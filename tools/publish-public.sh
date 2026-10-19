@@ -112,7 +112,11 @@ if git diff --cached --quiet; then
 else
   git -c user.name="alexopenfan-xiaxin" -c user.email="alexopenfan-xiaxin@users.noreply.github.com" \
     commit -q -m "sync: 公开发布快照 ${RELEASE_TAG:-$(date +%F)}"
-  git --no-pager diff --stat HEAD~1 HEAD | tail -20
+  if git rev-parse --verify -q HEAD~1 >/dev/null; then
+    git --no-pager diff --stat HEAD~1 HEAD | tail -20
+  else
+    git --no-pager show --stat --oneline HEAD | head -20
+  fi
 fi
 
 if [ "$APPROVED" != 1 ]; then
