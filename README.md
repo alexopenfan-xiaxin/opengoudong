@@ -69,7 +69,7 @@
 
 ## 安装
 
-1. 到 [Releases](../../releases) 下载最新的 `goudong-patched.apk`；
+1. 到 [Releases](https://github.com/alexopenfan-xiaxin/opengoudong/releases) 下载最新的 `goudong-patched.apk`；
 2. 直接安装（需要允许「安装未知来源应用」）；
 3. **首次安装必须先卸载官方客户端**：包名与签名都不同，Android 不允许覆盖；卸载会清空应用数据，
    登录状态需要重新扫码 / 登录一次；
