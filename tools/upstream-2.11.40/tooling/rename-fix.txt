@@ -1,0 +1,7 @@
+normdiff 把这一对判定为「纯重命名」（归一化后方法体一致，R8 索引位移）：
+  old: smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$renderAccounts$lambda$66$$inlined$sortedByDescending$1.smali
+  new: smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$renderAccounts$lambda$71$$inlined$sortedByDescending$1.smali
+重命名对被 normdiff 排除在 REAL ADDED / REAL REMOVED 之外，但 2.11.40 的
+KugouRushFragment（编译产物）引用的是新名字 → 必须：
+  * add 新文件（重命名隐藏新增，与第 34 轮对 3 个同款文件的处理一致）；
+  * 旧文件进 delete.txt（应用时按死代码判据删除；实测仅自引用，安全）。

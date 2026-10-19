@@ -1,0 +1,253 @@
+RENAMES (pure index shift) 0
+REAL ADDED 3
+  + smali_classes12/com/goudong/jd/data/repo/PortalRepository$fetchElmActiveExchangeTasks$lambda$17$$inlined$requestData$default$1.smali
+  + smali_classes3/com/goudong/jd/data/model/ApiError$$ExternalSyntheticBackport0.smali
+  + smali_classes3/com/goudong/jd/data/model/NotifyUnreadStats$$ExternalSyntheticBackport0.smali
+REAL REMOVED 2
+  - smali_classes6/com/goudong/jd/ui/tasks/TasksFragment$renderPointsTab$6$3$2.smali
+  - smali_classes9/com/goudong/jd/ui/projects/KugouRushHubFragment$onCreateView$2$2.smali
+REAL CHANGED 33
+  * smali_classes10/com/goudong/jd/ui/more/CoinLogActivity.smali
+       .method protected onCreate(Landroid/os/Bundle;)V
+  * smali_classes11/com/goudong/jd/ui/common/AppTheme.smali
+       .method public final color(Landroid/content/Context;I)I
+       .method public final pageBackground(Landroid/content/Context;)I
+       .method static constructor <clinit>()V
+  * smali_classes11/com/goudong/jd/ui/common/LiquidGlassNavBar.smali
+       .method private final drawFrostedFill(Landroid/graphics/Canvas;FZ)V
+       .method private final drawGlassLens(Landroid/graphics/Canvas;ZFFZF)V
+       .method private final drawItems(Landroid/graphics/Canvas;ZII)V
+       .method protected onDraw(Landroid/graphics/Canvas;)V
+  * smali_classes11/com/goudong/jd/ui/common/UiKitKt$$ExternalSyntheticLambda2.smali
+       .method public final run()V
+       .method public synthetic constructor <init>(Lcom/example/liquidglass/GlassTabLayout;)V
+       .method public synthetic constructor <init>(Lcom/google/android/material/tabs/TabLayout;)V
+  * smali_classes11/com/goudong/jd/ui/common/UiKitKt.smali
+       .method private static final applyCompactTabs$lambda$N(Lcom/example/liquidglass/GlassTabLayout;)V
+       .method private static final applyCompactTabs$lambda$N(Lcom/google/android/material/tabs/TabLayout;)V
+       .method public static final actionGridTile(Landroid/content/Context;Ljava/util/List;I)Landroid/widget/LinearLayout;
+       .method public static final actionTile(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/functions/Function0;)Landroid/view/View;
+       .method public static final alert(Landroidx/appcompat/app/AppCompatActivity;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+       .method public static final alert(Landroidx/fragment/app/Fragment;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+       .method public static final applyCompactTabs(Lcom/example/liquidglass/GlassTabLayout;)V
+       .method public static final applyCompactTabs(Lcom/google/android/material/tabs/TabLayout;)V
+       .method public static final applyOutlineActionStyle(Landroid/widget/Button;Lcom/goudong/jd/ui/common/OutlineActionTone;FII)V
+       .method public static final badge(Landroid/content/Context;Ljava/lang/String;I)Landroid/widget/TextView;
+       .method public static final bodyText(Landroid/content/Context;Ljava/lang/String;)Landroid/widget/TextView;
+       .method public static final captionText(Landroid/content/Context;Ljava/lang/String;)Landroid/widget/TextView;
+       .method public static final closeButton(Landroid/content/Context;Lkotlin/jvm/functions/Function0;)Landroid/widget/ImageButton;
+       .method public static final compactHeroCard(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/LinearLayout;
+       .method public static final compactPrimaryButton(Landroid/content/Context;Ljava/lang/String;I)Landroid/widget/Button;
+       .method public static final compactPrimaryButton(Landroid/content/Context;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Landroid/widget/Button;
+       .method public static final filledChip(Landroid/content/Context;Ljava/lang/String;II)Landroid/widget/TextView;
+       .method public static final heroCard(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;II)Landroid/widget/LinearLayout;
+       .method public static final inputField(Landroid/content/Context;Ljava/lang/String;ZZ)Landroid/widget/EditText;
+       .method public static final makeScrollContainer(Landroid/content/Context;)Lkotlin/Pair;
+       .method public static final makeTaskLogScrollView(Landroid/content/Context;ILkotlin/jvm/functions/Function1;)Lkotlin/Pair;
+       .method public static final outlineActionButton(Landroid/content/Context;Ljava/lang/String;Lcom/goudong/jd/ui/common/OutlineActionTone;FII)Landroid/widget/Button;
+       .method public static final pageToolbar(Landroidx/appcompat/app/AppCompatActivity;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Landroid/widget/LinearLayout;
+       .method public static final primaryButton(Landroid/content/Context;Ljava/lang/String;I)Landroid/widget/Button;
+       .method public static final primaryButton(Landroid/content/Context;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Landroid/widget/Button;
+       .method public static final searchField(Landroid/content/Context;Ljava/lang/String;)Landroid/widget/EditText;
+       .method public static final secondaryButton(Landroid/content/Context;Ljava/lang/String;)Landroid/widget/Button;
+       .method public static final sectionTitle(Landroid/content/Context;Ljava/lang/String;)Landroid/widget/TextView;
+       .method public static final showScrollablePicker(Landroidx/fragment/app/Fragment;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+       .method public static final softCard(Landroid/content/Context;I)Landroid/widget/LinearLayout;
+       .method public static final statCard(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/LinearLayout;
+       .method public static final toast(Landroidx/appcompat/app/AppCompatActivity;Ljava/lang/String;)V
+       .method public static final toast(Landroidx/fragment/app/Fragment;Ljava/lang/String;)V
+       .method public static synthetic $r8$lambda$NjM_Uu2A_qDLLuZ00qCHU5YFV0(Lkotlin/jvm/functions/Function0;Landroid/content/DialogInterface;I)V
+       .method public static synthetic $r8$lambda$R5JvxiUifTX41ttOYdPxObfR9cE(Lcom/example/liquidglass/GlassTabLayout;)V
+       .method public static synthetic $r8$lambda$ZX7tlzkmyaBjYlz_PtmPRfg4k_I(Lcom/google/android/material/bottomsheet/BottomSheetDialog;Landroid/content/DialogInterface;)V
+       .method public static synthetic $r8$lambda$aud7CAF2278JVeK6ItJUMv2UTf4(Lkotlin/jvm/functions/Function0;Landroid/content/DialogInterface;I)V
+       .method public static synthetic $r8$lambda$dMgScGCBdkwSAbMUQrIiRwq4y0M(Lcom/google/android/material/tabs/TabLayout;)V
+  * smali_classes12/com/goudong/jd/ui/jd/JdLoginActivity.smali
+       .method protected onCreate(Landroid/os/Bundle;)V
+  * smali_classes12/com/goudong/jd/ui/jd/JdPortalFragment$buildFullView$2$1.smali
+       .method public onTabReselected(Lcom/example/liquidglass/LiquidGlassTabLayout$Tab;)V
+       .method public onTabReselected(Lcom/google/android/material/tabs/TabLayout$Tab;)V
+       .method public onTabSelected(Lcom/example/liquidglass/LiquidGlassTabLayout$Tab;)V
+       .method public onTabSelected(Lcom/google/android/material/tabs/TabLayout$Tab;)V
+       .method public onTabUnselected(Lcom/example/liquidglass/LiquidGlassTabLayout$Tab;)V
+       .method public onTabUnselected(Lcom/google/android/material/tabs/TabLayout$Tab;)V
+  * smali_classes12/com/goudong/jd/ui/jd/JdPortalFragment$onResume$1.smali
+       .method public final invoke()V
+  * smali_classes12/com/goudong/jd/ui/jd/JdPortalFragment.smali
+       .method private final buildAccountCard(Lcom/goudong/jd/data/model/PortalJdAccount;)Landroid/view/View;
+       .method private final buildFullView()Landroid/view/View;
+       .method private final setupTaskStickyBar()V
+       .method private static final buildFullView$lambda$N(Lcom/goudong/jd/ui/jd/JdPortalFragment;)V
+       .method public getInnerTabCount()I
+       .method public getInnerTabIndex()I
+       .method public resetToInitialState()V
+       .method public selectInnerTab(I)V
+  * smali_classes3/com/goudong/jd/push/JPushHelper.smali
+       .method public final ensureInitialized(Landroid/content/Context;)V
+  * smali_classes4/com/goudong/jd/ui/home/HomeFragment.smali
+       .method private final coinLogCard(Lcom/goudong/jd/data/model/PortalHomeSnapshot;)Landroid/view/View;
+       .method private final renderHome(Lcom/goudong/jd/data/model/PortalHomeSnapshot;)V
+  * smali_classes6/com/goudong/jd/ui/tasks/AlipayRechargeActivity.smali
+       .method private final ensurePayDialog()V
+       .method private final makeOutlineButton(Ljava/lang/String;FLkotlin/jvm/functions/Function0;)Landroid/widget/Button;
+  * smali_classes6/com/goudong/jd/ui/tasks/TasksFragment$onCreateView$1$1.smali
+       .method public onTabReselected(Lcom/example/liquidglass/LiquidGlassTabLayout$Tab;)V
+       .method public onTabReselected(Lcom/google/android/material/tabs/TabLayout$Tab;)V
+       .method public onTabSelected(Lcom/example/liquidglass/LiquidGlassTabLayout$Tab;)V
+       .method public onTabSelected(Lcom/google/android/material/tabs/TabLayout$Tab;)V
+       .method public onTabUnselected(Lcom/example/liquidglass/LiquidGlassTabLayout$Tab;)V
+       .method public onTabUnselected(Lcom/google/android/material/tabs/TabLayout$Tab;)V
+  * smali_classes6/com/goudong/jd/ui/tasks/TasksFragment$onResume$1.smali
+       .method public final invoke()V
+  * smali_classes6/com/goudong/jd/ui/tasks/TasksFragment.smali
+       .method private final applyDashboard(Lcom/goudong/jd/data/model/PortalDashboard;)V
+       .method private final makeQuickTile(Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/functions/Function0;)Landroid/widget/LinearLayout;
+       .method private final makeStatTile(Ljava/lang/String;Ljava/lang/String;II)Landroid/widget/LinearLayout;
+       .method private final makeStatsGrid(Lcom/goudong/jd/data/model/PortalDashboard;)Landroid/widget/LinearLayout;
+       .method private final renderCoinLogTab()V
+       .method private final renderCurrentTab()V
+       .method private final renderPointsTab()V
+       .method public getInnerTabCount()I
+       .method public getInnerTabIndex()I
+       .method public onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+       .method public resetToInitialState()V
+       .method public selectInnerTab(I)V
+  * smali_classes6/com/goudong/jd/ui/tasks/WechatRechargeActivity.smali
+       .method private final ensurePayDialog()V
+       .method private final makeOutlineButton(Ljava/lang/String;FLkotlin/jvm/functions/Function0;)Landroid/widget/Button;
+  * smali_classes7/com/goudong/jd/AndroidApp.smali
+       .method public onCreate()V
+  * smali_classes7/com/goudong/jd/MainActivity.smali
+       .method protected onCreate(Landroid/os/Bundle;)V
+       .method protected onResume()V
+       .method public constructor <init>()V
+  * smali_classes9/com/goudong/jd/ui/auth/AuthActivity.smali
+       .method private final styledInput(Ljava/lang/String;ZZ)Landroid/widget/EditText;
+  * smali_classes9/com/goudong/jd/ui/projects/CkEditActivity.smali
+       .method protected onCreate(Landroid/os/Bundle;)V
+  * smali_classes9/com/goudong/jd/ui/projects/ElmCkFormActivity.smali
+       .method private final buildFormCard(Ljava/lang/String;)Landroid/view/View;
+  * smali_classes9/com/goudong/jd/ui/projects/ElmDailyRushFragment.smali
+       .method private final actionBtn(Landroid/content/Context;Ljava/lang/String;I)Landroid/widget/TextView;
+       .method private final cardLp(I)Landroid/widget/LinearLayout$LayoutParams;
+       .method private final editRemark(Ljava/lang/String;)V
+       .method private final loadActiveFromBundle()V
+       .method private final planRow(Landroid/content/Context;Ljava/lang/String;Ljava/util/List;ZZ)Landroid/view/View;
+       .method private final renderAccounts()V
+       .method private final renderPlanSummary()V
+       .method private final smallBtn(Landroid/content/Context;Ljava/lang/String;I)Landroid/widget/TextView;
+       .method private final startCountdown(Ljava/lang/String;Ljava/lang/String;)V
+       .method public onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+       .method public static synthetic $r8$lambda$NNhQnvwWugRYWLUoh3tzKpa6Y8E(Lcom/goudong/jd/ui/projects/ElmDailyRushFragment;Landroid/widget/CheckBox;Ljava/lang/String;Landroid/widget/CompoundButton;Z)V
+       .method public static synthetic $r8$lambda$WYRDedhonkU_Fm3y0C_jPA5hluc(ZLcom/goudong/jd/ui/projects/ElmDailyRushFragment;Ljava/lang/String;Landroid/view/View;)V
+       .method public static synthetic $r8$lambda$tijRbvZdmjFIroR88n9K6Hq1BsI(Lcom/goudong/jd/ui/projects/ElmDailyRushFragment;Ljava/lang/String;Landroid/content/DialogInterface;I)V
+       .method public static synthetic $r8$lambda$uQ1pJsAS2CgVN2pn0xHrFmAIQg0(Landroid/widget/EditText;Lcom/goudong/jd/ui/projects/ElmDailyRushFragment;Ljava/lang/String;Landroid/content/DialogInterface;I)V
+  * smali_classes9/com/goudong/jd/ui/projects/ElmHelpFragment.smali
+       .method private final buildPickField(Landroid/content/Context;)Lcom/goudong/jd/ui/projects/ElmHelpFragment$PickFieldViews;
+       .method private final buildUi()V
+       .method private final cardBg(Landroid/content/Context;)Landroid/graphics/drawable/GradientDrawable;
+       .method private final lpBottom(I)Landroid/widget/LinearLayout$LayoutParams;
+       .method private final stepperBtn(Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Landroid/widget/TextView;
+       .method private final tabButton(Ljava/lang/String;Z)Landroid/widget/TextView;
+       .method private final updateRefPickField(Lcom/goudong/jd/data/model/PortalElmHelpTypeView;)V
+       .method public onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+       .method public static synthetic $r8$lambda$X7vT7HjKOarY8d238d25WlEqflQ(Lcom/goudong/jd/ui/projects/ElmHelpFragment;Landroid/view/View;Z)V
+       .method public static synthetic $r8$lambda$v5gVlBW2Ebr08hMtRhYW2_UIw9k(Lcom/goudong/jd/ui/projects/ElmHelpFragment;Lcom/goudong/jd/data/model/PortalElmHelpTypeView;Landroid/content/DialogInterface;I)V
+  * smali_classes9/com/goudong/jd/ui/projects/ElmRushFragment.smali
+       .method private final actionBtn(Landroid/content/Context;Ljava/lang/String;I)Landroid/widget/TextView;
+       .method private final cardLp(I)Landroid/widget/LinearLayout$LayoutParams;
+       .method private final editRemark(Ljava/lang/String;)V
+       .method private final fieldLabel(Landroid/content/Context;Ljava/lang/String;)Landroid/widget/TextView;
+       .method private final isSlotBeforeExecute(Lcom/goudong/jd/data/model/ElmSlotProduct;)Ljava/lang/Boolean;
+       .method private final parseExecuteAtMs(Ljava/lang/String;)Ljava/lang/Long;
+       .method private final renderAccounts()V
+       .method private final smallBtn(Landroid/content/Context;Ljava/lang/String;I)Landroid/widget/TextView;
+       .method public onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+       .method public static synthetic $r8$lambda$BlmowdVwiBWiTxedA9n-2ANSBTM(Lcom/goudong/jd/ui/projects/ElmRushFragment;Ljava/lang/String;Landroid/widget/CompoundButton;Z)V
+       .method public static synthetic $r8$lambda$H0hnFVGp-Kr2-DVGeaNsV4MIsM8(Lkotlin/jvm/internal/Ref$BooleanRef;Landroid/widget/LinearLayout;Landroid/widget/TextView;Landroid/view/View;)V
+       .method public static synthetic $r8$lambda$J9Na64H1k29sLwbpdxE6gGiReuQ(Lcom/goudong/jd/ui/projects/ElmRushFragment;Landroid/widget/RadioGroup;I)V
+       .method public static synthetic $r8$lambda$_rKB-mB7aX5fqi992cwqGlevtfI(Lcom/goudong/jd/ui/projects/ElmRushFragment;Landroid/view/View;)V
+       .method public static synthetic $r8$lambda$sYs43XYbPfVp3CwlzMP6xAk2wpU(Lcom/goudong/jd/ui/projects/ElmRushFragment;Ljava/lang/String;Landroid/content/DialogInterface;I)V
+       .method public static synthetic $r8$lambda$w15EhgKifAUP7YHHcJdieGbBxoA(Landroid/widget/EditText;Lcom/goudong/jd/ui/projects/ElmRushFragment;Ljava/lang/String;Landroid/content/DialogInterface;I)V
+  * smali_classes9/com/goudong/jd/ui/projects/ElmRushHubFragment.smali
+       .method public onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+  * smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment.smali
+       .method private final lastTaskId()Ljava/lang/String;
+       .method private final renderServerLogs(Ljava/util/List;)V
+       .method private static final renderAccounts$lambda$N$lambda$N$lambda$N$lambda$N(Lcom/goudong/jd/ui/projects/KugouRushFragment$AccountTierState;Lcom/goudong/jd/data/model/KugouLevel;Lcom/goudong/jd/ui/projects/KugouRushFragment;Ljava/lang/String;Landroid/widget/CompoundButton;Z)V
+       .method public onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+       .method public static final synthetic access$lastTaskId(Lcom/goudong/jd/ui/projects/KugouRushFragment;)Ljava/lang/String;
+       .method public static final synthetic access$prefs(Lcom/goudong/jd/ui/projects/KugouRushFragment;)Landroid/content/SharedPreferences;
+       .method public static final synthetic access$renderServerLogs(Lcom/goudong/jd/ui/projects/KugouRushFragment;Ljava/util/List;)V
+       .method public static synthetic $r8$lambda$RMhnWiqvItreeTJPjtAe1UVcpcE(Lcom/goudong/jd/ui/projects/KugouRushFragment$AccountTierState;Lcom/goudong/jd/data/model/KugouLevel;Lcom/goudong/jd/ui/projects/KugouRushFragment;Ljava/lang/String;Landroid/widget/CompoundButton;Z)V
+       .method public static synthetic $r8$lambda$q4JZjLXB_J1CoKrUdsGJ_L9uvgI(Lcom/goudong/jd/ui/projects/KugouRushFragment;)V
+       .method public static synthetic $r8$lambda$qtRdCMQx_1V2XRT8gIkVsuuZXaw(Lcom/goudong/jd/ui/projects/KugouRushFragment;Ljava/lang/String;Landroid/widget/LinearLayout;Landroid/widget/CompoundButton;Z)V
+  * smali_classes9/com/goudong/jd/ui/projects/KugouRushHubFragment.smali
+       .method private final showTab(I)V
+       .method public final selectProduct(Ljava/lang/String;)V
+       .method public onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+       .method public onViewCreated(Landroid/view/View;Landroid/os/Bundle;)V
+  * smali_classes9/com/goudong/jd/ui/projects/KuwoRushFragment.smali
+       .method private final editableField(Ljava/lang/String;)Landroid/widget/EditText;
+       .method private final fieldLabel(Ljava/lang/String;)Landroid/widget/TextView;
+       .method private final lastTaskId()Ljava/lang/String;
+       .method private final readonlyField(Ljava/lang/String;)Landroid/widget/EditText;
+       .method private final renderAccountCheckboxes()V
+       .method private final saveKuwoState(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;ZZ)V
+       .method private final updateSavedTaskId(Ljava/lang/String;ZLjava/lang/Integer;)V
+       .method private final updateSmsUiMode()V
+       .method public onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+       .method public static final synthetic access$lastTaskId(Lcom/goudong/jd/ui/projects/KuwoRushFragment;)Ljava/lang/String;
+       .method public static synthetic $r8$lambda$-GZ9nhaw8aUtWIX6SOwB7ar9Bt4(Lcom/goudong/jd/ui/projects/KuwoRushFragment;Landroid/widget/RadioGroup;I)V
+       .method public static synthetic $r8$lambda$m30GG3ukzkZwqHNce0Qq86ejsco(Lcom/goudong/jd/ui/projects/KuwoRushFragment;ILandroid/widget/CompoundButton;Z)V
+       .method public static synthetic $r8$lambda$myhd7Agx1VcU8-WmLhDWKfAprEw(Lcom/goudong/jd/ui/projects/KuwoRushFragment;Landroid/widget/CompoundButton;Z)V
+  * smali_classes9/com/goudong/jd/ui/projects/ProjectRushListFragment.smali
+       .method public onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+  * smali_classes9/com/goudong/jd/ui/projects/ProjectsFragment$onCreateView$2$1.smali
+       .method public onTabReselected(Lcom/example/liquidglass/LiquidGlassTabLayout$Tab;)V
+       .method public onTabReselected(Lcom/google/android/material/tabs/TabLayout$Tab;)V
+       .method public onTabSelected(Lcom/example/liquidglass/LiquidGlassTabLayout$Tab;)V
+       .method public onTabSelected(Lcom/google/android/material/tabs/TabLayout$Tab;)V
+       .method public onTabUnselected(Lcom/example/liquidglass/LiquidGlassTabLayout$Tab;)V
+       .method public onTabUnselected(Lcom/google/android/material/tabs/TabLayout$Tab;)V
+  * smali_classes9/com/goudong/jd/ui/projects/ProjectsFragment.smali
+       .method private final activityCard(Lcom/goudong/jd/data/model/PortalActivity;)Landroid/view/View;
+       .method private final addProtocolBackBar()V
+       .method private final applyPendingNavigation()V
+       .method private final buildCollapsibleIntroCard(Ljava/lang/String;Ljava/lang/String;)Landroid/view/View;
+       .method private final decodeQrImage(Ljava/lang/String;)Landroid/graphics/Bitmap;
+       .method private final emptyCard(Ljava/lang/String;)Landroid/view/View;
+       .method private final groupCard(Ljava/lang/String;Ljava/util/List;)Landroid/view/View;
+       .method private final loadOnVisible()V
+       .method private final renderGaProtocol(Z)V
+       .method private final renderProjectRush()V
+       .method private final renderProtocolHub()V
+       .method private final renderWxDeviceList(Ljava/util/List;)V
+       .method private final renderWxProtocol()V
+       .method private final renderYybProtocol(Z)V
+       .method private final showDeleteConfirm(Lcom/goudong/jd/data/model/PortalProject;)V
+       .method private final showRenewDialog(Lcom/goudong/jd/data/model/PortalProject;)V
+       .method private static final renderYybProtocol$manageBtn(Landroid/content/Context;Ljava/lang/String;ZLkotlin/jvm/functions/Function0;)Landroid/widget/TextView;
+       .method private static final showDeleteConfirm$calcPaidDays(Lcom/goudong/jd/data/model/PortalProject;)I
+       .method private static final wxDeviceCard$lambda$N$mkBtn(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/functions/Function0;)Landroid/widget/TextView;
+       .method public final openProtocolAccess(I)V
+       .method public getInnerTabCount()I
+       .method public getInnerTabIndex()I
+       .method public onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+       .method public resetToInitialState()V
+       .method public selectInnerTab(I)V
+       .method public static synthetic $r8$lambda$IaoA0gR_wogcqgH8wudb4JLIH0E(Lcom/goudong/jd/ui/projects/ProjectsFragment;Ljava/lang/String;ZLandroid/content/DialogInterface;I)V
+       .method public static synthetic $r8$lambda$LA0M-z9rszrl8BLvxpK-nYValyg(Lcom/goudong/jd/ui/projects/ProjectsFragment;Landroid/content/DialogInterface;I)V
+       .method public static synthetic $r8$lambda$LnDTZgo-Kid1P9-FAlUaPCDZKw4(Lcom/goudong/jd/ui/projects/ProjectsFragment;Lcom/goudong/jd/data/model/PortalYybAccount;Landroid/content/DialogInterface;I)V
+       .method public static synthetic $r8$lambda$NDtJqtlaT-y6Xe7bJzqKQ5Hw8(Lkotlin/jvm/functions/Function2;Ljava/lang/Object;Ljava/lang/Object;)I
+       .method public static synthetic $r8$lambda$NPzQEtNDr8FS5v0jNhiOmEMPV8Q(Ljava/lang/String;Lcom/goudong/jd/ui/projects/ProjectsFragment;Ljava/lang/String;Landroid/content/DialogInterface;I)V
+       .method public static synthetic $r8$lambda$NkguYL0Thh8Hvlf9P_jXqZTqLoU(Lcom/goudong/jd/ui/projects/ProjectsFragment;Landroid/content/DialogInterface;)V
+       .method public static synthetic $r8$lambda$O94PsvkYVGYEgV-QzrRoaipWbV4(Lcom/goudong/jd/ui/projects/ProjectsFragment;Ljava/lang/String;Ljava/lang/String;Landroid/content/DialogInterface;I)V
+       .method public static synthetic $r8$lambda$UC6BI7zs7P3xtWc7M_srfUA_lqI(Landroid/widget/EditText;Lcom/goudong/jd/ui/projects/ProjectsFragment;Ljava/lang/String;Lcom/goudong/jd/data/model/PortalProject;Landroid/content/DialogInterface;I)V
+       .method public static synthetic $r8$lambda$c1tLy7z3eb0VPjbOF26rQrtKwrA(Landroid/view/View;)V
+       .method public static synthetic $r8$lambda$gIWwLKyX2L1iSKkbMGzheVCvyxM(Lcom/goudong/jd/ui/projects/ProjectsFragment;Landroid/content/DialogInterface;I)V
+       .method public static synthetic $r8$lambda$jOpIjaIU8TsAQ6wp3SNTN-vODnA(Lcom/goudong/jd/data/model/PortalProject;Lcom/goudong/jd/ui/projects/ProjectsFragment;ZLandroid/content/DialogInterface;I)V
+       .method static synthetic renderYybProtocol$manageBtn$default(Landroid/content/Context;Ljava/lang/String;ZLkotlin/jvm/functions/Function0;ILjava/lang/Object;)Landroid/widget/TextView;
+  * smali_classes9/com/goudong/jd/ui/projects/ProtocolGaPanel.smali
+       .method private final renderShell(Z)V
+  * smali_classes9/com/goudong/jd/update/UpdateChecker.smali
+       .method public final check(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

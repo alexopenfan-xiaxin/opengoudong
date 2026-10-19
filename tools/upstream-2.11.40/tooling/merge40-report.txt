@@ -1,0 +1,25 @@
+== smali_classes11/com/goudong/jd/ui/common/UiKitKt.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 121  took-upstream: 2  our-deletions-honored: 3
+   RECIPE metadata replace x1: "Lcom/google/android/material/tabs/TabLayout;" -> "Lcom/example/liquidglass/GlassTabLayout;"
+   kept-deleted: .method public static synthetic $r8$lambda$dMgScGCBdkwSAbMUQrIiRwq4y0M(Lcom/google/android/material/
+   kept-deleted: .method public static final applyCompactTabs(Lcom/google/android/material/tabs/TabLayout;)V
+   kept-deleted: .method private static final applyCompactTabs$lambda$140(Lcom/google/android/material/tabs/TabLayout
+== smali_classes7/com/goudong/jd/MainActivity.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 82  took-upstream: 6  our-deletions-honored: 0
+   took-line3: .method protected onCreate(Landroid/os/Bundle;)V [line3 5]
+   took-line3: .method protected onResume()V [line3 2]
+   RECIPE .method protected onCreate(Landroid/os/Bundle;)V -> recipe:THEIRS+oncreate-edits
+   RECIPE .method protected onResume()V -> recipe:THEIRS+CHECKIN
+   RECIPE dropped dead: .method public final handleUnauthorized()V
+== smali_classes9/com/goudong/jd/ui/auth/AuthActivity.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 18  took-upstream: 3  our-deletions-honored: 0
+== smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 117  took-upstream: 26  our-deletions-honored: 0
+== smali_classes9/com/goudong/jd/update/UpdateChecker.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 1  took-upstream: 1  our-deletions-honored: 0
+   took-line3: .method public final check(Lkotlin/coroutines/Continuation;)Ljava/lang/Object; [line3 4]

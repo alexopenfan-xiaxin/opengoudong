@@ -1,0 +1,43 @@
+{
+  "_comment": "Declarative UI theme for goudong. Applied by tools/patch-theme.mjs during CI. Edit values, push, and the workflow rebuilds the APK. Round 37: iOS 26 system color family (light/dark).",
+  "colors": {
+    "brand_primary": "#FF0A84FF",
+    "brand_secondary": "#FF5E5CE6",
+    "brand_red": "#FFFF3B30",
+    "brand_green": "#FF34C759",
+    "brand_orange": "#FFFF9500",
+    "surface_soft": "#FFF2F2F7",
+    "surface_card": "#FFFFFFFF",
+    "surface_elevated": "#FFFFFFFF",
+    "text_primary": "#FF1C1C1E",
+    "text_secondary": "#FF3A3A3C",
+    "text_muted": "#FF6C6C70",
+    "text_hint": "#FFAEAEB2",
+    "border_default": "#263C3F43",
+    "border_light": "#143C3F43",
+    "chip_bg": "#1F787880",
+    "chip_active_text": "#FFFFFFFF"
+  },
+  "colorsNight": {
+    "brand_primary": "#FF64D2FF",
+    "brand_secondary": "#FF7D7AFF",
+    "brand_red": "#FFFF6961",
+    "brand_green": "#FF30D158",
+    "brand_orange": "#FFFFA94D",
+    "surface_soft": "#FF000000",
+    "surface_card": "#FF1C1C1E",
+    "surface_elevated": "#FF2C2C2E",
+    "text_primary": "#FFFFFFFF",
+    "text_secondary": "#FFEBEBF5",
+    "text_muted": "#FFAEAEB2",
+    "text_hint": "#FF636366",
+    "border_default": "#33AEAEB2",
+    "border_light": "#1AAEAEB2",
+    "chip_bg": "#2E787880",
+    "chip_active_text": "#FFFFFFFF"
+  },
+  "strings": {
+    "app_name": "狗东开源版"
+  },
+  "replacements": []
+}

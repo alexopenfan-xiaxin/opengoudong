@@ -1,0 +1,182 @@
+RENAMES (pure index shift) 1
+  = smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$renderAccounts$lambda$66$$inlined$sortedByDescending$1.smali -> smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$renderAccounts$lambda$71$$inlined$sortedByDescending$1.smali
+REAL ADDED 18
+  + smali_classes12/com/goudong/jd/data/repo/PortalRepository$loadKugouPortalConfig$$inlined$requestData$default$1.smali
+  + smali_classes12/com/goudong/jd/data/repo/PortalRepository$loadKugouPortalConfig$1.smali
+  + smali_classes12/com/goudong/jd/data/repo/PortalRepository$probePortalSession$1.smali
+  + smali_classes12/com/goudong/jd/data/repo/PortalRepository$setKugouRushModePref$$inlined$requestData$1.smali
+  + smali_classes12/com/goudong/jd/data/repo/PortalRepository$setKugouRushModePref$1.smali
+  + smali_classes3/com/goudong/jd/data/model/KugouPortalConfigLoad.smali
+  + smali_classes5/com/goudong/jd/data/session/KugouPortalConfigStore$Companion.smali
+  + smali_classes5/com/goudong/jd/data/session/KugouPortalConfigStore.smali
+  + smali_classes7/com/goudong/jd/MainActivity$authLauncher$1$1.smali
+  + smali_classes7/com/goudong/jd/MainActivity$onResume$1.smali
+  + smali_classes9/com/goudong/jd/ui/auth/AuthActivity$onCreate$1.smali
+  + smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$$ExternalSyntheticLambda4.smali
+  + smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$buildPage$3$3$2.smali
+  + smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$buildPage$6$5$2.smali
+  + smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$buildPage$7$2$1.smali
+  + smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$buildPage$7$5$1.smali
+  + smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$buildPage$7$logViews$1.smali
+  + smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$rushModeSwitchListener$1$1.smali
+REAL REMOVED 27
+  - smali_classes12/com/goudong/jd/data/repo/JdRepository$fetchPins$1.smali
+  - smali_classes12/com/goudong/jd/data/repo/JdRepository$fetchUserInfo$1.smali
+  - smali_classes12/com/goudong/jd/data/repo/JdRepository$fetchUserInfo$4.smali
+  - smali_classes12/com/goudong/jd/data/repo/JdRepository$submitCookie$1.smali
+  - smali_classes12/com/goudong/jd/data/repo/JdRepository.smali
+  - smali_classes12/com/goudong/jd/ui/jd/JdGuestFragment$$ExternalSyntheticLambda0.smali
+  - smali_classes12/com/goudong/jd/ui/jd/JdGuestFragment$loadNotice$1.smali
+  - smali_classes12/com/goudong/jd/ui/jd/JdGuestFragment$onCreateView$1$5$1.smali
+  - smali_classes12/com/goudong/jd/ui/jd/JdGuestFragment$onCreateView$2$1.smali
+  - smali_classes12/com/goudong/jd/ui/jd/JdGuestFragment$onCreateView$3$1.smali
+  - smali_classes12/com/goudong/jd/ui/jd/JdGuestFragment$onCreateView$3$2.smali
+  - smali_classes12/com/goudong/jd/ui/jd/JdGuestFragment$onCreateView$3$3.smali
+  - smali_classes12/com/goudong/jd/ui/jd/JdGuestFragment$queryAll$1$1$1$1.smali
+  - smali_classes12/com/goudong/jd/ui/jd/JdGuestFragment$queryAll$1.smali
+  - smali_classes12/com/goudong/jd/ui/jd/JdGuestFragment.smali
+  - smali_classes12/com/goudong/jd/ui/jd/JdLoginActivity$onCreate$1$1.smali
+  - smali_classes12/com/goudong/jd/ui/jd/JdLoginActivity$onCreate$1$2.smali
+  - smali_classes12/com/goudong/jd/ui/jd/JdLoginActivity$onCreate$3$2.smali
+  - smali_classes12/com/goudong/jd/ui/jd/JdLoginActivity$onCreate$refreshBtn$1$1.smali
+  - smali_classes12/com/goudong/jd/ui/jd/JdLoginActivity$submitCookie$1$2$1.smali
+  - smali_classes12/com/goudong/jd/ui/jd/JdLoginActivity$submitCookie$1.smali
+  - smali_classes12/com/goudong/jd/ui/jd/JdLoginActivity.smali
+  - smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$buildPage$2$3$2.smali
+  - smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$buildPage$5$5$2.smali
+  - smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$buildPage$6$2$1.smali
+  - smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$buildPage$6$5$1.smali
+  - smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$buildPage$6$logViews$1.smali
+REAL CHANGED 26
+  * smali_classes10/com/goudong/jd/ui/more/AboutVersionActivity$loadChangelog$1.smali
+       .method public final invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
+  * smali_classes10/com/goudong/jd/ui/more/AboutVersionActivity$manualCheckUpdate$1.smali
+       .method public final invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
+  * smali_classes10/com/goudong/jd/ui/more/AboutVersionActivity.smali
+       .method protected onCreate(Landroid/os/Bundle;)V
+  * smali_classes11/com/goudong/jd/ui/common/UiKitKt.smali
+       .method public static final handlePortalError(Landroidx/appcompat/app/AppCompatActivity;Ljava/lang/Throwable;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+       .method public static final handlePortalError(Landroidx/fragment/app/Fragment;Ljava/lang/Throwable;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+  * smali_classes12/com/goudong/jd/data/repo/PortalRepository.smali
+       .method public constructor <init>(Lcom/goudong/jd/data/network/ApiClient;Lcom/goudong/jd/data/session/SessionManager;Landroid/content/Context;)V
+       .method public final fetchKugouConfig(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+       .method public final loadKugouPortalConfig(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+       .method public final probePortalSession(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+       .method public final setKugouRushModePref(Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+       .method public static synthetic loadKugouPortalConfig$default(Lcom/goudong/jd/data/repo/PortalRepository;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+       .method public static synthetic setKugouRushModePref$default(Lcom/goudong/jd/data/repo/PortalRepository;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+  * smali_classes12/com/goudong/jd/ui/jd/JdFragment$$ExternalSyntheticLambda0.smali
+       .method public final run()V
+  * smali_classes12/com/goudong/jd/ui/jd/JdFragment$$ExternalSyntheticLambda1.smali
+       .method public final run()V
+  * smali_classes12/com/goudong/jd/ui/jd/JdFragment.smali
+       .method private final syncChildFragment(Z)V
+       .method public resetToInitialState()V
+       .method public static synthetic $r8$lambda$NW9ufi6H-WKreNMbX8mLj83NyaQ(Lcom/goudong/jd/ui/jd/JdFragment;)V
+       .method public static synthetic $r8$lambda$_c9UDLRzBwgHnXdKS_Lx-3yLLXc(Lcom/goudong/jd/ui/jd/JdFragment;Z)V
+       .method public static synthetic $r8$lambda$r8jzOwaXUjhb1P8kEmAGvBts3bU(Lcom/goudong/jd/ui/jd/JdFragment;Z)V
+       .method public static synthetic $r8$lambda$zpkZgy2VTsh-442XfY-4l5gZJoE(Lcom/goudong/jd/ui/jd/JdFragment;)V
+  * smali_classes3/com/goudong/jd/data/model/KugouPortalConfig.smali
+       .method public constructor <init>()V
+       .method public constructor <init>(Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Double;Ljava/lang/Integer;Ljava/lang/Double;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)V
+       .method public constructor <init>(Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Double;Ljava/lang/Integer;Ljava/lang/Double;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/Boolean;)V
+       .method public equals(Ljava/lang/Object;)Z
+       .method public final component14()Ljava/lang/Integer;
+       .method public final component14()Ljava/lang/String;
+       .method public final component15()Ljava/lang/String;
+       .method public final component16()Ljava/lang/Boolean;
+       .method public final component17()Ljava/lang/Integer;
+       .method public final component18()Ljava/lang/Boolean;
+       .method public final copy(Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Double;Ljava/lang/Integer;Ljava/lang/Double;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)Lcom/goudong/jd/data/model/KugouPortalConfig;
+       .method public final copy(Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Double;Ljava/lang/Integer;Ljava/lang/Double;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/Boolean;)Lcom/goudong/jd/data/model/KugouPortalConfig;
+       .method public final getAdminRushMode()Ljava/lang/String;
+       .method public final getDebugRush()Ljava/lang/Boolean;
+       .method public final getRushModeChoiceAllowed()Ljava/lang/Boolean;
+       .method public final getUserRushMode()Ljava/lang/String;
+       .method public hashCode()I
+       .method public static synthetic copy$default(Lcom/goudong/jd/data/model/KugouPortalConfig;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Double;Ljava/lang/Integer;Ljava/lang/Double;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)Lcom/goudong/jd/data/model/KugouPortalConfig;
+       .method public static synthetic copy$default(Lcom/goudong/jd/data/model/KugouPortalConfig;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Double;Ljava/lang/Integer;Ljava/lang/Double;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/Boolean;ILjava/lang/Object;)Lcom/goudong/jd/data/model/KugouPortalConfig;
+       .method public synthetic constructor <init>(Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Double;Ljava/lang/Integer;Ljava/lang/Double;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+       .method public synthetic constructor <init>(Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Double;Ljava/lang/Integer;Ljava/lang/Double;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+       .method public toString()Ljava/lang/String;
+  * smali_classes4/com/goudong/jd/ui/home/HomeFragment$loadData$1.smali
+       .method public final invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
+  * smali_classes7/com/goudong/jd/AppServices.smali
+       .method public final clearLoginSessionGrace()V
+       .method public final getJdRepository()Lcom/goudong/jd/data/repo/JdRepository;
+       .method public final init(Landroid/content/Context;)V
+       .method public final markPortalLoginSuccess()V
+       .method public final shouldDeferUnauthorizedHandling()Z
+  * smali_classes7/com/goudong/jd/MainActivity$handleUnauthorized$1.smali
+       .method constructor <init>(Lcom/goudong/jd/MainActivity;Lkotlin/coroutines/Continuation;)V
+       .method constructor <init>(ZLcom/goudong/jd/MainActivity;Lkotlin/coroutines/Continuation;)V
+       .method public final create(Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Lkotlin/coroutines/Continuation;
+       .method public final invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
+  * smali_classes7/com/goudong/jd/MainActivity$onCreate$3$1.smali
+       .method public onPageSelected(I)V
+  * smali_classes7/com/goudong/jd/MainActivity$onTabChanged$1.smali
+       .method public final invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
+  * smali_classes7/com/goudong/jd/MainActivity.smali
+       .method private final requiresAuth(I)Z
+       .method private static final authLauncher$lambda$N(Lcom/goudong/jd/MainActivity;Landroidx/activity/result/ActivityResult;)V
+       .method protected onCreate(Landroid/os/Bundle;)V
+       .method protected onResume()V
+       .method public final handleUnauthorized()V
+       .method public final handleUnauthorized(Z)V
+       .method public static synthetic handleUnauthorized$default(Lcom/goudong/jd/MainActivity;ZILjava/lang/Object;)V
+  * smali_classes8/com/goudong/jd/data/network/ApiClient.smali
+       .method private final withClientHeaders(Ljava/util/Map;)Ljava/util/Map;
+  * smali_classes9/com/goudong/jd/ui/auth/AuthActivity$buildResetPage$2$1$2$1.smali
+       .method constructor <init>(Lcom/goudong/jd/ui/auth/AuthActivity;)V
+       .method constructor <init>(Lcom/goudong/jd/ui/auth/AuthActivity;Ljava/lang/String;)V
+       .method public final invoke()V
+  * smali_classes9/com/goudong/jd/ui/auth/AuthActivity$buildResetPage$2$1.smali
+       .method public final invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
+  * smali_classes9/com/goudong/jd/ui/auth/AuthActivity.smali
+       .method private final finishWithSuccess(Ljava/lang/String;)V
+       .method protected onCreate(Landroid/os/Bundle;)V
+       .method public static final synthetic access$getPREFS_NAME$p(Lcom/goudong/jd/ui/auth/AuthActivity;)Ljava/lang/String;
+  * smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$$ExternalSyntheticLambda0.smali
+       .method public final run()V
+  * smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$$ExternalSyntheticLambda1.smali
+       .method public final onCheckedChanged(Landroid/widget/CompoundButton;Z)V
+  * smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$$ExternalSyntheticLambda2.smali
+       .method public final onCheckedChanged(Landroid/widget/CompoundButton;Z)V
+  * smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$$ExternalSyntheticLambda3.smali
+       .method public final onCheckedChanged(Landroid/widget/CompoundButton;Z)V
+       .method public final run()V
+  * smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment$loadPage$1.smali
+       .method public final invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
+  * smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment.smali
+       .method private final applyPortalConfig(Lcom/goudong/jd/data/model/KugouPortalConfig;)V
+       .method private final applyPortalConfig(Lcom/goudong/jd/data/model/KugouPortalConfig;Z)V
+       .method private final buildPage()V
+       .method private final canChooseRushMode()Z
+       .method private final isAutoRushMode()Z
+       .method private final isDebugRush()Z
+       .method private final isDebugRushMode()Z
+       .method private final label(Ljava/lang/String;)Landroid/widget/TextView;
+       .method private final refreshConfigStaleHint()V
+       .method private final renderAccounts()V
+       .method private final startWithdraw()V
+       .method private final syncStartButton()V
+       .method private final updateTimeDisplay()V
+       .method private static final renderAccounts$lambda$N$lambda$N$lambda$N(Lcom/goudong/jd/ui/projects/KugouRushFragment;Ljava/lang/String;Landroid/widget/LinearLayout;Landroid/widget/CompoundButton;Z)V
+       .method private static final rushModeSwitchListener$lambda$N(Lcom/goudong/jd/ui/projects/KugouRushFragment;Landroid/widget/CompoundButton;Z)V
+       .method public constructor <init>()V
+       .method public static final synthetic access$applyPortalConfig(Lcom/goudong/jd/ui/projects/KugouRushFragment;Lcom/goudong/jd/data/model/KugouPortalConfig;)V
+       .method public static final synthetic access$applyPortalConfig(Lcom/goudong/jd/ui/projects/KugouRushFragment;Lcom/goudong/jd/data/model/KugouPortalConfig;Z)V
+       .method public static final synthetic access$getAutoRushSwitch$p(Lcom/goudong/jd/ui/projects/KugouRushFragment;)Landroid/widget/Switch;
+       .method public static final synthetic access$setRushModeSwitchUpdating$p(Lcom/goudong/jd/ui/projects/KugouRushFragment;Z)V
+       .method public static synthetic $r8$lambda$HuzshwWxoUzkOuLXxHCI2IIdJd8(Lcom/goudong/jd/ui/projects/KugouRushFragment;)V
+       .method public static synthetic $r8$lambda$NQf_P3AkRbixPsD3SrPs8G6Q1Bw(Lcom/goudong/jd/ui/projects/KugouRushFragment;)V
+       .method public static synthetic $r8$lambda$NbXxYG8Wym0bWry4ZAgyrNQ7Lg0(ZLcom/goudong/jd/ui/projects/KugouRushFragment$AccountTierState;Lcom/goudong/jd/data/model/KugouLevel;Lcom/goudong/jd/ui/projects/KugouRushFragment;Ljava/lang/String;Landroid/widget/CompoundButton;Z)V
+       .method public static synthetic $r8$lambda$_nX3XzuThAqdeil34iTjAJL_CPE(Lcom/goudong/jd/ui/projects/KugouRushFragment;Ljava/lang/String;Landroid/widget/LinearLayout;Landroid/widget/CompoundButton;Z)V
+       .method public static synthetic $r8$lambda$fBW13McHgMM5YUfcUHZvcuxC0H8(Lcom/goudong/jd/ui/projects/KugouRushFragment;Ljava/lang/String;Landroid/widget/LinearLayout;Landroid/widget/CompoundButton;Z)V
+       .method public static synthetic $r8$lambda$fnMAyuse1f5h3RoR5E5Pv6IDJvE(Lcom/goudong/jd/ui/projects/KugouRushFragment;Landroid/widget/CompoundButton;Z)V
+       .method public static synthetic $r8$lambda$hu21NNF2c2TN3MnEWnjgkdOn8hE(Lcom/goudong/jd/ui/projects/KugouRushFragment;)V
+       .method public static synthetic $r8$lambda$mM23MajAM5o2uzFGj2ImfsB1R-k(Lcom/goudong/jd/ui/projects/KugouRushFragment;)V
+       .method public static synthetic $r8$lambda$wnQVn0Do9F7wilRt4g85eoFWyFc(ZLcom/goudong/jd/ui/projects/KugouRushFragment$AccountTierState;Lcom/goudong/jd/data/model/KugouLevel;Lcom/goudong/jd/ui/projects/KugouRushFragment;Ljava/lang/String;Landroid/widget/CompoundButton;Z)V
+       .method static synthetic applyPortalConfig$default(Lcom/goudong/jd/ui/projects/KugouRushFragment;Lcom/goudong/jd/data/model/KugouPortalConfig;ZILjava/lang/Object;)V
+  * smali_classes9/com/goudong/jd/update/UpdateChecker.smali
+       .method public final check(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

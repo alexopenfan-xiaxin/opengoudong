@@ -1,0 +1,16 @@
+# build outputs
+build/
+*.apk.tmp
+local-patched.apk
+aligned-patched.apk
+final-patched.apk
+apktool.jar
+*.keystore
+# 固定签名密钥必须进仓库（覆盖安装要求签名稳定）—— 见 README「签名与安装」
+!tools/signing/goudong-signing.keystore
+__pycache__/
+*.pyc
+.DS_Store
+
+# 公开仓库不包含官方原始安装包（构建时自备）
+goudong.apk

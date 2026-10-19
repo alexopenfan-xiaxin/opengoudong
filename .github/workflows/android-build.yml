@@ -1,0 +1,279 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  APKTOOL_VERSION: "2.11.1"
+  APK_NAME: goudong.apk
+  # 注意：build-tools_r35_linux.zip 解出来的目录名是 android-15（历史遗留命名），
+  # 不是 android-35，所以下面一律用通配符解析目录。
+  BUILD_TOOLS_ZIP: build-tools_r35_linux.zip
+  # 库源码用了 API 36 的符号（Build.VERSION_CODES.BAKLAVA / RuntimeXfermode / RuntimeColorFilter）
+  PLATFORM_ZIP: platform-36_r02.zip
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache build toolchain downloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/tools/dl
+            build/tools/bt
+            build/tools/apktool.jar
+          key: lg-tools-${{ runner.os }}-${{ env.APKTOOL_VERSION }}-${{ env.PLATFORM_ZIP }}-v2
+
+      - name: Locate Android SDK
+        id: sdk
+        run: |
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          echo "root=$SDK" >> "$GITHUB_OUTPUT"
+          BT=$(ls -d "$SDK"/build-tools/* 2>/dev/null | sort -V | tail -1)
+          echo "preinstalled build-tools: ${BT:-none}"
+          ls "$SDK" 2>/dev/null || true
+
+      - name: Download Android build-tools r35
+        run: |
+          # 必须用 r35+：zipalign 的 -P 16（16 KB 页对齐）只在 35 及以后存在。
+          # 注意 build-tools_r35_linux.zip 解出来的目录名是 android-15（历史遗留命名）。
+          mkdir -p build/tools
+          if [ -z "$(ls -d build/tools/bt/android-* 2>/dev/null)" ]; then
+            curl -sSL --retry 4 --retry-all-errors -o /tmp/bt.zip \
+              "https://dl.google.com/android/repository/${BUILD_TOOLS_ZIP}"
+            mkdir -p build/tools/bt && unzip -q -o /tmp/bt.zip -d build/tools/bt
+          fi
+          chmod +x build/tools/bt/android-*/* 2>/dev/null || true
+          BT=$(ls -d build/tools/bt/android-* | head -1)
+          echo "BT=$BT"
+          "$BT/zipalign" 2>&1 | head -2
+
+      - name: Download apktool
+        run: |
+          mkdir -p build/tools
+          curl -sSL --retry 4 --retry-all-errors -o build/tools/apktool.jar \
+            "https://repo1.maven.org/maven2/org/apktool/apktool-cli/${APKTOOL_VERSION}/apktool-cli-${APKTOOL_VERSION}.jar"
+          ls -lh build/tools/apktool.jar
+
+      # ---------------------------------------------------------------- Task 1
+      - name: Fetch liquidglass v2.0.11 sources and apply patches
+        run: node tools/liquidglass/fetch-sources.mjs build/lg-src
+
+      # ---------------------------------------------------------------- Task 3
+      - name: Compile library + shim (kotlinc 1.9.24 -> classes)
+        env:
+          LG_CACHE: ${{ github.workspace }}/build/tools/dl
+          ANDROID_SDK_ROOT: ${{ steps.sdk.outputs.root }}
+        run: bash tools/liquidglass/compile.sh
+
+      - name: Decode APK
+        run: java -jar build/tools/apktool.jar d -f "$APK_NAME" -o build/dec
+
+      - name: Apply theme patch
+        run: node tools/patch-theme.mjs build/dec tools/theme.json
+
+      - name: Apply brand (app name / icon / package com.goudong.open)
+        run: node tools/patch-brand.mjs build/dec com.goudong.open 2.11.44
+
+      - name: Disable update check (user request)
+        run: node tools/patch-update.mjs build/dec
+
+      # ------------------------------------------------- Task 5 (round 9) -> round 14: 页面瘦身
+      - name: Remove the whole More page/tab (round 14)
+        run: node tools/patch-more.mjs build/dec
+
+      - name: Remove projects sort/filter row + re-space search box (round 14)
+        run: node tools/patch-projects.mjs build/dec
+
+      - name: Remove tasks 手机卡业务 card (round 14)
+        run: node tools/patch-tasks.mjs build/dec
+
+      - name: Mute JPush mismatch notification (round 14; optional theme.json jpush.appkey)
+        run: node tools/patch-push.mjs build/dec tools/theme.json
+
+      - name: Apply scenery wallpaper background (round 15)
+        run: node tools/patch-background.mjs build/dec
+
+      # ------------------------------------------------- Task 3 (round 9): 分段控件
+      - name: Replace segmented controls with glass tab layout
+        run: node tools/patch-tablayout.mjs build/dec
+
+      # ------------------------------------------------- Task 2 (round 9): 全局组件
+      - name: Glass the app view factory (UiKitKt)
+        run: node tools/patch-uikit.mjs build/dec
+
+      - name: Glass directly instantiated widgets
+        run: node tools/patch-widgets.mjs build/dec
+
+      # ------------------------------------------- round 21: 早崩取证/切页不重载/序号隐藏+分页
+      - name: Install early crash capture (Application.onCreate)
+        run: node tools/patch-crashcatcher.mjs build/dec
+
+      - name: No reload on tab/page switch
+        run: node tools/patch-noresume-reload.mjs build/dec
+
+      - name: Activity serial hide + 5-per-page worm dots
+        run: node tools/patch-activity-page.mjs build/dec
+
+      - name: Home first cut (inbox + summary bars)
+        run: node tools/patch-home.mjs build/dec
+
+      # --------------------------- round 23: 顶部栏悬浮 + 京东任务页删账号卡片
+      - name: Floating header + remove JD account-select card (round 23)
+        run: node tools/patch-floating-header.mjs build/dec
+
+      # --------------------------- round 24: 抢兑 dock + 清屏修正 + 代理卡片 + 积分玻璃顶栏
+      - name: Rush dock inset + page-clear fix + proxy card + coin glass header (round 24)
+        run: node tools/patch-round24.mjs build/dec
+
+      # --------------------------- round 25: 抢兑顶部悬浮 + 京东 sticky 空壳卸载
+      - name: Rush top floating + remove JD sticky shell (round 25)
+        run: node tools/patch-round25.mjs build/dec
+
+      # --------------------------- upstream follow: 狗东 2.11.24 -> 2.11.34
+      # 支付宝充值模块 / 酷狗抢兑产品化+场次 / 酷我时段+追加参与 / 项目暂停与删除审核 /
+      # 任务页支付宝入口 / UiKitKt 新组件；并把版本号对齐上游 2.11.34 (versionCode 160)。
+      - name: Follow upstream 2.11.34 (alipay recharge, kugou sessions, project review)
+        run: node tools/patch-upstream.mjs build/dec
+
+      # --------------------------- round 35: kugou rush hub fixes
+      # 酷狗抢兑概念版/普通版 Hub：普通版整屏空白（兄弟滚动宿主被误算成页头）+
+      # tab 改我们风格（全宽玻璃 tab 条，去掉重复大标题）。
+      - name: Round 35 kugou rush hub (blank fix + our-style tabs)
+        run: node tools/patch-round35.mjs build/dec
+
+      # --------------------------- round 36: fixed header row (hub tab bar) visible
+      # 酷狗抢兑 Hub 的「概念版/普通版」tab 条是固定页头：位置改由真实窗口坐标算
+      # （不再靠负 topMargin 推导）+ 可见性自愈 + 一次性几何诊断；发行号 2.11.37。
+      - name: Round 36 kugou hub fixed tab row (position + visibility)
+        run: node tools/patch-round36.mjs build/dec
+
+      # --------------------------- round 37/38: iOS 26 global redesign
+      # 配色 + 字号阶 iOS 化 + Toast/对话框换库成品（内容卡保持非玻璃：第 38 轮回退了
+      # 卡片玻璃与窗口根采样兜底 —— 玻璃只留在 chrome 层）；发行号 2.11.40。
+      - name: Round 37/38 iOS 26 redesign (palette + type scale + library widgets)
+        run: node tools/patch-round37.mjs build/dec
+
+      # ------------------- round 38: crash fix (pager id + dialog resolution)
+      # 登录后闪退两条根因的修复落地：对话框换装的 owner 精确化（见 round37 D 段）
+      # + MainActivity 的 pager id 固定化（进程重建时 SavedState 撞车）；发行号 2.11.40。
+      - name: Round 38 crash fix (fixed pager id)
+        run: node tools/patch-round38.mjs build/dec
+
+      # ------------------- round 39: kugou rush entry picker + drop the in-page tab
+      # 入口不再一步直达概念版：点卡片在下方展开自绘的版本选择器（概念版 / 普通版）；
+      # 进入后页面里那条「酷狗概念版 / 酷狗普通版」玻璃 tab 条整条删除；发行号 2.11.41。
+      - name: Round 39 kugou rush entry picker (drop in-page version tab)
+        run: node tools/patch-round39.mjs build/dec
+
+      # ------------------- round 40: elm rush entry picker (same expand-in-place form)
+      # 饿了么抢兑入口改成和酷狗抢兑同一种形式：点卡片就地展开选择器（周五抢兑 / 日常抢兑），
+      # 不再进中间的「选择抢兑类型」页；shim 泛化为 RushEntryPicker（installKugou / installElm）；
+      # 发行号 2.11.42。
+      - name: Round 40 elm rush entry picker (skip the type-selection page)
+        run: node tools/patch-round40.mjs build/dec
+
+      # ------------------- round 41: daily auto check-in / pray (ON by default)
+      # 当日首次进入 App 自动签到 + 祈福：开关在任务页「每日任务」标题旁，默认开；
+      # 判定 = 本地当日标记做节流 + 服务端 dashboard 的 checkedInToday/prayedToday 做真相。
+      # shim：DailyAutoCheckin.kt；发行号 2.11.43。（原计划的首启引导已在发布前撤掉 —
+      # 见 docs/aegis/plans/2026-10-11-round41-daily-autocheckin.md §0）
+      - name: Round 41 daily auto check-in / pray (default on)
+        run: node tools/patch-round41.mjs build/dec
+
+      # ------------------- round 42: follow upstream 2.11.34 -> 2.11.40 (chain tail)
+      # 登录/会话重构（删 JdLoginActivity/JdGuestFragment/JdRepository 旧 cookie 链路，
+      # 改 MainActivity.authLauncher -> AuthActivity + handleUnauthorized(Z)/requiresAuth）、
+      # 酷狗抢兑模式配置（KugouPortalConfigStore / loadKugouPortalConfig / setKugouRushModePref）、
+      # 杂项（UpdateChecker / ApiClient / About / JdFragment / UiKitKt.handlePortalError）。
+      # 移植产物在 tools/upstream-2.11.40/（方法级三方合并，判定链见 tooling/）；
+      # 本步骤是补丁链尾，版本号 2.11.44 / versionCode 167 由它落定。
+      - name: Round 42 follow upstream 2.11.40 (login refactor + kugou rush mode)
+        run: node tools/patch-round42.mjs build/dec
+
+      # ---------------------------------------------------------------- Task 4
+      - name: Build classes14.dex and stage smali / native lib
+        env:
+          LG_CACHE: ${{ github.workspace }}/build/tools/dl
+          ANDROID_SDK_ROOT: ${{ steps.sdk.outputs.root }}
+          D8: ${{ github.workspace }}/build/tools/bt/android-15/d8
+          APKTOOL_JAR: ${{ github.workspace }}/build/tools/apktool.jar
+        run: bash tools/liquidglass/build-dex.sh
+
+      - name: Build APK (apktool)
+        run: java -jar build/tools/apktool.jar b build/dec -o build/unsigned.apk
+
+      - name: Load stable signing keystore
+        run: |
+          # 固定签名密钥：Android 要求「覆盖安装」的签名与已装包一致。
+          # 早期这里每次构建 keytool -genkeypair 现场生成新密钥，导致每个包签名都不同，
+          # 安装时被系统判为「与现有软件包存在冲突」。现在密钥长期固定在仓库里
+          # （tools/signing/goudong-signing.keystore，alias gd / pass android），
+          # 所有构建互相可覆盖安装；verify.py #6 会钉住证书指纹防止回退。
+          test -f tools/signing/goudong-signing.keystore \
+            || { echo "missing tools/signing/goudong-signing.keystore (stable key)"; exit 1; }
+          cp tools/signing/goudong-signing.keystore build/debug.keystore
+
+      - name: Zipalign (16 KB page alignment)
+        run: |
+          BT=$(ls -d build/tools/bt/android-* | head -1)
+          "$BT/zipalign" -P 16 -f 4 build/unsigned.apk build/aligned.apk
+
+      - name: Sign APK
+        run: |
+          BT=$(ls -d build/tools/bt/android-* | head -1)
+          "$BT/apksigner" sign \
+            --ks build/debug.keystore --ks-pass pass:android --key-pass pass:android \
+            --ks-key-alias gd --v1-signing-enabled true --v2-signing-enabled true \
+            --v3-signing-enabled true \
+            --out build/goudong-patched.apk build/aligned.apk
+
+      # ---------------------------------------------------------------- Task 5
+      - name: Verify product (appendix C, 36 assertions)
+        run: |
+          BT=$(ls -d build/tools/bt/android-* | head -1)
+          python3 tools/liquidglass/verify.py \
+            --apk build/goudong-patched.apk \
+            --smali14 build/dec/smali_classes14 \
+            --smali-dec build/dec \
+            --src build/lg-src \
+            --zipalign "$BT/zipalign" \
+            --apksigner "$BT/apksigner" \
+            --expect-dex 14
+
+      # ---------------------------------------------------------------- Task 6
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: goudong-patched-apk
+          path: build/goudong-patched.apk
+          if-no-files-found: error
+
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/goudong-patched.apk
