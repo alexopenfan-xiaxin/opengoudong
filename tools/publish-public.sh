@@ -91,6 +91,18 @@ cp -f "$ROOT"/docs/version-diff-*.md "$SNAP/docs/" 2>/dev/null || true
 cp -f "$ROOT/docs/public/README.md" "$SNAP/README.md"
 cp -f "$ROOT/docs/public/preview-src/hero.png" "$SNAP/docs/preview/hero.png"
 cp -f "$ROOT/.github/workflows/android-build.yml" "$SNAP/.github/workflows/android-build.yml"
+# 公开仓库不含官方原始 APK，push/tag 触发必然在「Decode APK」失败 -> 公开副本只保留手动触发
+python3 - "$SNAP/.github/workflows/android-build.yml" <<'PYWF'
+import re, sys
+p = sys.argv[1]
+s = open(p).read()
+s = re.sub(r"(?ms)^on:\n(?:.*?\n)*?permissions:",
+           "on:\n"
+           "  # 本仓库不包含官方原始安装包（goudong.apk），因此只保留手动触发；\n"
+           "  # 自行放入 APK 后，可恢复 push / tag 触发。\n"
+           "  workflow_dispatch:\n\npermissions:", s, count=1)
+open(p, "w").write(s)
+PYWF
 cp -f "$ROOT/.gitignore" "$SNAP/.gitignore"
 
 # 公开仓库不接收官方原始 APK：补一条忽略规则（源 .gitignore 里它是被跟踪的输入）
