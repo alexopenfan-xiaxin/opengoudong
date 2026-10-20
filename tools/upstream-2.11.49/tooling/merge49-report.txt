@@ -1,0 +1,89 @@
+== smali_classes11/com/goudong/jd/ui/common/AppTheme.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 21  took-upstream: 2  our-deletions-honored: 0
+== smali_classes11/com/goudong/jd/ui/common/UiKitKt$$ExternalSyntheticLambda2.smali
+   prelude: line3(0 conflicts)
+   kept-ours: 1  took-upstream: 1  our-deletions-honored: 1
+   kept-deleted: .method public synthetic constructor <init>(Lcom/google/android/material/tabs/TabLayout;)V
+== smali_classes11/com/goudong/jd/ui/common/UiKitKt.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 104  took-upstream: 27  our-deletions-honored: 3
+   RECIPE metadata replace x1: "Lcom/google/android/material/tabs/TabLayout;" -> "Lcom/example/liquidglass/GlassTabLayout;"
+   kept-deleted: .method public static synthetic $r8$lambda$acb7edRrCiqAhPqi0LHq6z0nF4Q(Lcom/google/android/material/
+   kept-deleted: .method public static final applyCompactTabs(Lcom/google/android/material/tabs/TabLayout;)V
+   kept-deleted: .method private static final applyCompactTabs$lambda$139(Lcom/google/android/material/tabs/TabLayout
+== smali_classes12/com/goudong/jd/ui/jd/JdPortalFragment.smali
+   prelude: line3(0 conflicts)
+   kept-ours: 194  took-upstream: 20  our-deletions-honored: 0
+== smali_classes4/com/goudong/jd/ui/home/HomeFragment.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 46  took-upstream: 18  our-deletions-honored: 0
+== smali_classes6/com/goudong/jd/ui/tasks/AlipayRechargeActivity.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 38  took-upstream: 9  our-deletions-honored: 0
+== smali_classes6/com/goudong/jd/ui/tasks/TasksFragment.smali
+   prelude: line3(0 conflicts)
+   kept-ours: 27  took-upstream: 5  our-deletions-honored: 0
+   took-line3: .method private final renderPointsTab()V [line3 7]
+   RECIPE replay upstream-rewrote-region, needs recipe: new-instance v8, Landroid/widget/Button;
+   RECIPE replay upstream-rewrote-region, needs recipe: invoke-direct {v8, v10}, Landroid/widget/Button;-><init>(Lan
+   RECIPE replay upstream-rewrote-region, needs recipe: new-instance v8, Landroid/widget/Button;
+   RECIPE replay upstream-rewrote-region, needs recipe: invoke-direct {v8, v10}, Landroid/widget/Button;-><init>(Lan
+   RECIPE replay upstream-rewrote-region, needs recipe: iget-object v5, v0, Lcom/goudong/jd/ui/tasks/TasksFragment;-
+   RECIPE locals 32 -> 33 in .method private final renderPointsTab()V
+   RECIPE .method private final renderPointsTab()V -> recipe:THEIRS+glass+no-phonecard
+== smali_classes6/com/goudong/jd/ui/tasks/WechatRechargeActivity.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 38  took-upstream: 9  our-deletions-honored: 0
+== smali_classes9/com/goudong/jd/ui/auth/AuthActivity.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 14  took-upstream: 7  our-deletions-honored: 0
+== smali_classes9/com/goudong/jd/ui/projects/CkEditActivity.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 16  took-upstream: 1  our-deletions-honored: 0
+== smali_classes9/com/goudong/jd/ui/projects/ElmCkFormActivity.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 16  took-upstream: 4  our-deletions-honored: 0
+== smali_classes9/com/goudong/jd/ui/projects/ElmDailyRushFragment.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 134  took-upstream: 52  our-deletions-honored: 0
+   RECIPE dropped dead: .method private final canStartMidnightNow()Z
+   RECIPE dropped dead: .method private final startCountdown(Ljava/lang/String;Ljava/lang/String;)V
+== smali_classes9/com/goudong/jd/ui/projects/ElmHelpFragment.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 60  took-upstream: 5  our-deletions-honored: 0
+== smali_classes9/com/goudong/jd/ui/projects/ElmRushFragment.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 136  took-upstream: 10  our-deletions-honored: 0
+== smali_classes9/com/goudong/jd/ui/projects/ElmRushHubFragment.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 4  took-upstream: 2  our-deletions-honored: 0
+   took-line3: .method public onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View; [line3 1]
+   RECIPE replay insert-left-for-recipe: move-object/from16 v0, p0
+   RECIPE .method public onCreateView(Landroid/view/LayoutInflater;Landroid/view -> recipe:THEIRS+dock
+== smali_classes9/com/goudong/jd/ui/projects/KugouRushFragment.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 137  took-upstream: 19  our-deletions-honored: 0
+== smali_classes9/com/goudong/jd/ui/projects/KuwoRushFragment.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 96  took-upstream: 8  our-deletions-honored: 0
+== smali_classes9/com/goudong/jd/ui/projects/ProjectRushListFragment.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 2  took-upstream: 6  our-deletions-honored: 0
+   took-line3: .method public onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View; [line3 19]
+   RECIPE replay insert-left-for-recipe: invoke-static {v0}, Lcom/goudong/jd/ui/projects/ProjectRushF
+   RECIPE replay insert-left-for-recipe: invoke-static {v0}, Lcom/goudong/jd/ui/projects/ProjectRushF
+   RECIPE replay insert-left-for-recipe: move-object/from16 v0, p0
+   RECIPE .method public onCreateView(Landroid/view/LayoutInflater;Landroid/view -> recipe:THEIRS+rush-hooks
+== smali_classes9/com/goudong/jd/ui/projects/ProjectsFragment.smali
+   prelude: line3(0 conflicts)
+   kept-ours: 297  took-upstream: 49  our-deletions-honored: 0
+   took-line3: .method private final activityCard(Lcom/goudong/jd/data/model/PortalActivity;)Landroid/view/View; [line3 70]
+   RECIPE replay insert-left-for-recipe: const/16 v15, 0x8
+   RECIPE .method private final activityCard(Lcom/goudong/jd/data/model/PortalAc -> recipe:THEIRS+hide-activity-no
+== smali_classes9/com/goudong/jd/ui/projects/ProtocolGaPanel.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 58  took-upstream: 7  our-deletions-honored: 0
+== smali_classes9/com/goudong/jd/update/UpdateChecker.smali
+   prelude: theirs(ours==base structurally)
+   kept-ours: 1  took-upstream: 1  our-deletions-honored: 0

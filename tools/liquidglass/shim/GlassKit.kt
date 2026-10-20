@@ -243,7 +243,7 @@ internal object GlassKit {
                 CrashCatcher.note(
                     "detached-glass FIRST stack:\n" + android.util.Log.getStackTraceString(t)
                 )
-                Log.w("GlassKit", "detached glass draw failed; falling back to plain widget", t)
+                DiagLog.warn("GLASS", "glass.draw.failed", t)
             }
             false
         }

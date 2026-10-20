@@ -1,7 +1,12 @@
 #!/usr/bin/env node
-// Application.onCreate 首行织入 CrashCatcher.installEarly（第 19 轮，早崩取证）。
+// 诊断体系织入（第 19 轮早崩捕获 + 第 44 轮网络埋点）。
 //
 // Usage: node tools/patch-crashcatcher.mjs <decoded-dir>
+//
+// 1) `AndroidApp.onCreate()` 首行织入 `CrashCatcher.installEarly` —— 早于一切 SDK 初始化；
+// 2) 第 44 轮：`ApiClient$client$2.invoke()` 的 OkHttpClient.Builder 之后织入
+//    `DiagNet.install(builder)` —— 全 App 唯一 OkHttp 构造点，一处覆盖全部接口的
+//    method/path/code/耗时/异常（不读 body、不记 query）。
 //
 // 背景：点开即闪、连 goudong-diag.log 都没有 —— 崩溃发生在第一个 Activity 之前
 // （Application 初始化链），installFrom(Context) 永远轮不到。把 installEarly
@@ -87,3 +92,27 @@ if (problems.length) fail(problems.join('; '));
 
 writeFileSync(TARGET, out, 'utf8');
 console.log('[patch-crashcatcher] OK — installEarly woven into AndroidApp.onCreate');
+
+// ---- 第 44 轮：OkHttp EventListener 织入 -----------------------------------
+const NET_MARKER = '第 44 轮：网络埋点';
+const NET_TARGET = join(root, 'smali_classes8/com/goudong/jd/data/network/ApiClient$client$2.smali');
+if (!existsSync(NET_TARGET)) fail(`missing ${NET_TARGET}`);
+
+let net = readFileSync(NET_TARGET, 'utf8');
+if (net.includes(NET_MARKER)) fail('okhttp hook already applied — refusing to double-apply');
+
+const NET_ANCHOR = 'invoke-direct {v0}, Lokhttp3/OkHttpClient$Builder;-><init>()V';
+const netHits = net.split(NET_ANCHOR).length - 1;
+if (netHits !== 1) fail(`okhttp builder anchor matched ${netHits} times, expected 1`);
+
+const netHook = [
+  NET_ANCHOR,
+  '',
+  `    # ${NET_MARKER}：只换 owner 不动签名；复用 v0（就是 builder 本体），不开新寄存器。`,
+  '    invoke-static {v0}, Lcom/example/liquidglass/DiagNet;->install(Lokhttp3/OkHttpClient$Builder;)Lokhttp3/OkHttpClient$Builder;',
+  '    move-result-object v0',
+];
+net = net.replace(NET_ANCHOR, () => netHook.join('\n'));
+if ((net.match(/DiagNet;->install/g) ?? []).length !== 1) fail('DiagNet hook is not exactly once');
+writeFileSync(NET_TARGET, net, 'utf8');
+console.log('[patch-crashcatcher] OK — DiagNet EventListener woven into ApiClient okhttp builder');

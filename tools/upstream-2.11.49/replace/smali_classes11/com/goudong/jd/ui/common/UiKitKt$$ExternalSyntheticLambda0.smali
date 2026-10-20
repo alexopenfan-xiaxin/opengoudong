@@ -1,0 +1,36 @@
+.class public final synthetic Lcom/goudong/jd/ui/common/UiKitKt$$ExternalSyntheticLambda0;
+.super Ljava/lang/Object;
+.source "D8$$SyntheticClass"
+
+# interfaces
+.implements Landroid/content/DialogInterface$OnShowListener;
+
+
+# instance fields
+.field public final synthetic f$0:Lcom/google/android/material/bottomsheet/BottomSheetDialog;
+
+
+# direct methods
+.method public synthetic constructor <init>(Lcom/google/android/material/bottomsheet/BottomSheetDialog;)V
+    .locals 0
+
+    .line 0
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    iput-object p1, p0, Lcom/goudong/jd/ui/common/UiKitKt$$ExternalSyntheticLambda0;->f$0:Lcom/google/android/material/bottomsheet/BottomSheetDialog;
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public final onShow(Landroid/content/DialogInterface;)V
+    .locals 1
+
+    .line 0
+    iget-object v0, p0, Lcom/goudong/jd/ui/common/UiKitKt$$ExternalSyntheticLambda0;->f$0:Lcom/google/android/material/bottomsheet/BottomSheetDialog;
+
+    invoke-static {v0, p1}, Lcom/goudong/jd/ui/common/UiKitKt;->$r8$lambda$pt04Wcz19g1AlCbQTU8GNgpC-0E(Lcom/google/android/material/bottomsheet/BottomSheetDialog;Landroid/content/DialogInterface;)V
+
+    return-void
+.end method

@@ -59,6 +59,29 @@ object RushDockInset {
      * @param scrollHost 子页 onCreateView 返回的根视图（ScrollView 或装着它的 wrapper）
      * @param dockInsetPx 底部 dock 高度（px）；<=0 时直接返回
      */
+    /**
+     * 第 43 轮 hotfix：给「方法局部寄存器不够用」的调用点准备的入口。
+     *
+     * 为什么需要：ElmRushHubFragment.onCreateView 只有 `.locals 12`（p0=v12），
+     * 任何新开局部量都会把 p1/p2 推出 v15，使上游既有的 `invoke-static {p1, v0}`
+     * 变成非法（smali: Invalid register v16）。这里把 dp 换算挪进 shim，
+     * 调用点只需 `invoke-static {scroll, p0}`（两个寄存器都 ≤ v15）。
+     *
+     * 104dp 与历史调用点（UiKitKt.dp(ctx, 0x68)）保持一致。
+     */
+    @JvmStatic
+    fun attachFrom(scrollHost: View?, host: Any?) {
+        try {
+            // 不写 `Fragment` 类型：会连带要求 lifecycle-viewmodel 在编译 classpath 上
+            // （compile.sh 不引入它，见 AGENTS §4.3「不要为了返回键回调把 androidx.activity 拉进 shim」同源教训）。
+            val ctx = host!!.javaClass.getMethod("requireContext").invoke(host) as android.content.Context
+            val px = (104f * ctx.resources.displayMetrics.density).toInt()
+            attach(scrollHost, px)
+        } catch (t: Throwable) {
+            DiagLog.warn("RUSH", "rush.dock.attachFrom.failed", t)
+        }
+    }
+
     @JvmStatic
     fun attach(scrollHost: View?, dockInsetPx: Int) {
         if (scrollHost == null || dockInsetPx <= 0) return
@@ -66,7 +89,7 @@ object RushDockInset {
             attachInner(scrollHost, dockInsetPx)
         } catch (t: Throwable) {
             CrashCatcher.note("RushDockInset.attach swallowed: $t")
-            Log.w(TAG, "rush dock inset attach failed; page keeps its original layout", t)
+            DiagLog.warn("RUSH", "rush.dock.attach.failed", t)
         }
     }
 
@@ -91,7 +114,7 @@ object RushDockInset {
                 CrashCatcher.note("RushDockInset.post swallowed: $t")
             }
         }
-        Log.d(TAG, "rush dock inset attached: ${dockInsetPx}px")
+        DiagLog.debug("RUSH", "rush.dock.attach", "inset" to dockInsetPx)
     }
 
     /**
@@ -178,7 +201,7 @@ object RushDockInset {
             applyTopInset(scrollHost, scroll, content)
         } catch (t: Throwable) {
             CrashCatcher.note("RushDockInset.refreshTopInset swallowed: $t")
-            Log.w(TAG, "rush top inset refresh failed; page keeps its current padding", t)
+            DiagLog.warn("RUSH", "rush.dock.refresh.failed", t)
         }
     }
 

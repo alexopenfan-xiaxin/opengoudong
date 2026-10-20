@@ -10,42 +10,40 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * 包内错误捕获（诊断器）：把「闪退/卡死」变成包内可回收的证据。
+ * 包内错误捕获（诊断器的**进程/崩溃层**）。
  *
- * 背景：真机上出现过「打开空白几秒后自动退出」，而 CI 的 17 项结构断言全绿 ——
- * 说明缺的是**运行期证据**。本类把证据直接写进包内日志文件，下次启动弹窗回放：
+ * 第 44 轮重构后职责收敛为四件事，其余全部交给 [DiagLog] / [DiagExport]：
+ *  1. 安装：`AndroidApp.onCreate` 首行（早崩路径，任何进程）；
+ *  2. 未捕获异常：FATAL 事件 + 异常链栈 + 同步兜底 + 导出 + 弹窗；
+ *  3. 卡死看门狗：主线程 3s 无进展抓主线程栈；
+ *  4. 兼容门面：`note()` 转发 [DiagLog]，旧调用点（smali 与 shim 共 30 处）一行不改。
  *
- * 1. **崩溃捕获**：默认未捕获异常处理器 —— 线程名 + 完整异常链与调用栈落盘；
- * 2. **卡死捕获**：看门狗线程每秒 ping 主线程心跳；主线程 3 秒无进展即判定 BLOCKED，
- *    并用 `Thread.getAllStackTraces()` 抓**主线程当时的调用栈**（卡死往往等不到崩溃栈）；
- * 3. **启动面包屑**：install → 玻璃部件构造 → 首帧(pre-draw) → alive@3s/@8s，
- *    每条带相对毫秒 —— 日志停在哪一段，就说明死在哪一段；
- * 4. **回放**：下次启动若上次日志含 FATAL / BLOCKED，弹窗展示全文 + 一键复制，
- *    无需 adb 就能取回证据。
+ * 与旧实现的关键差别（真机根因）：
+ *  - 旧 `installEarly` 在每个进程 append banner，而 `install()` 因为共用同一个 `installed`
+ *    标志**永远进不去** → 主文件只增不减、回放/导出/面包屑全是死代码。这里拆成
+ *    `earlyInstalled` 与 `activityAttached` 两个标志，各自幂等。
+ *  - 落盘/轮转/会话在 DiagLog；导出命名/保留在 DiagExport。
  *
  * 全部逻辑 try/catch 包裹：诊断器自身绝不拖垮宿主。
  */
 object CrashCatcher {
 
-    private val installed = AtomicBoolean(false)
-    private val lock = Any()
+    private val earlyInstalled = AtomicBoolean(false)
+    private val activityAttached = AtomicBoolean(false)
     private val mainHandler = Handler(Looper.getMainLooper())
 
     @Volatile private var startedMs = 0L
     @Volatile private var tick = 0
-    @Volatile private var logFile: File? = null
+    @Volatile private var earlyApp: Context? = null
 
-    /** 追加一行诊断日志（相对毫秒前缀）。任何失败都静默。 */
+    /** 追加一行诊断日志（兼容旧调用点；实际落到 [DiagLog] 的结构化记录里） */
     @JvmStatic
     fun note(msg: String) {
         try {
-            val f = logFile ?: return
-            val line = "+" + (SystemClock.elapsedRealtime() - startedMs) + "ms " + msg + "\n"
-            synchronized(lock) { f.appendText(line) }
+            DiagLog.note(msg)
         } catch (_: Throwable) {
         }
     }
@@ -53,118 +51,63 @@ object CrashCatcher {
     /** 从任意 Context（Activity/ContextThemeWrapper/Application/…）安装。幂等。 */
     @JvmStatic
     fun installFrom(context: Context) {
-        var c: Context? = context
-        var act: Activity? = null
-        while (c is ContextWrapper) {
-            if (c is Activity) {
-                act = c
-                break
+        try {
+            var c: Context? = context
+            var act: Activity? = null
+            while (c is ContextWrapper) {
+                if (c is Activity) {
+                    act = c
+                    break
+                }
+                c = c.baseContext
             }
-            c = c.baseContext
+            val a = act ?: return
+            install(a)
+        } catch (_: Throwable) {
         }
-        val a = act ?: return
-        install(a)
     }
 
     /**
-     * 第 19 轮：从 Application.onCreate 安装（早崩取证）。
+     * 早崩路径：`AndroidApp.onCreate` 首行织入（见 `tools/patch-crashcatcher.mjs`）。
      *
-     * 背景：点开即闪、连 goudong-diag.log 都没有 —— 崩溃发生在第一个 Activity
-     * 之前（Application 或首个玻璃构造之前），installFrom 永远轮不到。
-     * 这里用 Application 做日志目录载体（Activity 只用来做「上次回放」的弹窗；
-     * Application 进不来 Activity，就不弹窗，只落盘 + 抓栈）。
-     * 由 patch-crashcatcher.mjs 织入 AndroidApp.onCreate 首行，早于一切 SDK 初始化。
+     * 每个进程都会进来；[DiagLog.install] 自己按进程名分流（`:pushcore` 只写 aux W/E）。
      */
     @JvmStatic
     fun installEarly(app: Context) {
-        if (!installed.compareAndSet(false, true)) return
+        if (!earlyInstalled.compareAndSet(false, true)) return
         try {
-            earlyApp = app.applicationContext ?: app
+            val ctx = app.applicationContext ?: app
+            earlyApp = ctx
             startedMs = SystemClock.elapsedRealtime()
-            // 第 19 轮补：早崩时 external files 可能不可写（分区未挂载/权限未就绪），
-            // 日志同时落两处 —— 私有目录（原有回放链）+ 公共 Download（MediaStore，
-            // 与 exportToDownloads 同通道，用户在文件管理里直接可见）。
-            // 只要有一处写进去，下次启动回放 / 用户直接取文件都能拿到 FATAL 栈。
-            val dir = try {
-                app.getExternalFilesDir(null) ?: app.filesDir
-            } catch (_: Throwable) {
-                app.filesDir
-            }
-            logFile = File(dir, "goudong-diag.log")
-            note(
-                "=== goudong-diag start: ${Build.MODEL} / Android ${Build.VERSION.RELEASE}" +
-                    " (SDK ${Build.VERSION.SDK_INT}) === [early]"
-            )
+            DiagLog.install(ctx)
+            (ctx as? android.app.Application)?.let { DiagTrace.attach(it) }
             installCrashHandler(null)
             installWatchdog()
         } catch (_: Throwable) {
         }
     }
 
-    /**
-     * 早崩直写公共 Download（installEarly 的 FATAL 路径用）。
-     * 无 Activity 也能调：只要进程还活着把这一行写完，文件管理里就有证据。
-     * 与 exportToDownloads 同一通道（MediaStore, Android 10+ 免存储权限）。
-     */
-    private fun exportEarly(app: Context, text: String) {
-        try {
-            if (Build.VERSION.SDK_INT < 29) return
-            val values = android.content.ContentValues().apply {
-                put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, "goudong-diag.txt")
-                put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "text/plain")
-                put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, "Download")
-            }
-            val uri = app.contentResolver.insert(
-                android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, values
-            ) ?: return
-            app.contentResolver.openOutputStream(uri)?.use { it.write(text.toByteArray()) }
-        } catch (_: Throwable) {
-        }
-    }
-
+    /** 第一个 Activity 就绪后：面包屑 + 上一会话回放（旧实现因标志冲突从未执行过） */
     @JvmStatic
     fun install(activity: Activity) {
-        if (!installed.compareAndSet(false, true)) return
+        if (!activityAttached.compareAndSet(false, true)) return
         try {
-            startedMs = SystemClock.elapsedRealtime()
-            val dir = activity.getExternalFilesDir(null) ?: activity.filesDir
-            val f = File(dir, "goudong-diag.log")
-            logFile = f
+            val act = activity.javaClass.simpleName
+            DiagLog.setPage(act)
+            DiagLog.event("BOOT", "ui.firstActivity", "act" to act)
 
-            // ---- 上次运行回放 ----------------------------------------------
-            val prev = readRaw(f)
-            val died = prev.contains("FATAL") || prev.contains("BLOCKED")
-            val unclean = prev.isNotBlank() && !prev.contains("alive@8s")
-            // 零门槛取证（第 11 轮）：先把上次日志落到公共 Download 目录 + 剪贴板。
-            // 之前的弹窗方案有个致命缺陷：本应用下次启动又卡死时，主线程根本轮不到
-            // 画弹窗 → 用户永远看不到报告。文件 + 剪贴板不依赖本应用的任何 UI。
-            if (prev.isNotBlank()) {
-                exportToDownloads(activity, prev)
-                copyToClipboard(activity, prev)
-            }
-            // 轮转：本会话从空开始
-            synchronized(lock) { f.writeText("") }
-
-            note(
-                "=== goudong-diag start: ${Build.MODEL} / Android ${Build.VERSION.RELEASE}" +
-                    " (SDK ${Build.VERSION.SDK_INT}) ==="
-            )
-
-            installCrashHandler(activity)
-            installWatchdog()
-
-            // ---- 3) 启动面包屑 --------------------------------------------
+            // 启动面包屑：停在哪一段，就死在哪一段
             try {
                 val decor = activity.window?.decorView
                 if (decor != null) {
-                    decor.post { note("ui-posted (decor attached)") }
+                    decor.post { DiagLog.event("BOOT", "ui.posted", "act" to act) }
                     decor.viewTreeObserver.addOnPreDrawListener(
                         object : android.view.ViewTreeObserver.OnPreDrawListener {
                             private var done = false
                             override fun onPreDraw(): Boolean {
                                 if (!done) {
                                     done = true
-                                    note("first pre-draw (first frame)")
+                                    DiagLog.event("BOOT", "ui.firstFrame", "act" to act)
                                     decor.viewTreeObserver.removeOnPreDrawListener(this)
                                 }
                                 return true
@@ -173,45 +116,63 @@ object CrashCatcher {
                 }
             } catch (_: Throwable) {
             }
-            mainHandler.postDelayed({ note("alive@3s") }, 3000)
-            mainHandler.postDelayed({ note("alive@8s") }, 8000)
+            mainHandler.postDelayed({ DiagLog.event("BOOT", "alive@3s") }, 3000)
+            mainHandler.postDelayed({ DiagLog.event("BOOT", "alive@8s") }, 8000)
 
-            // ---- 4) 上次出事 → 弹窗回放（文件已导出，弹窗只是加分项） --------
-            if (died || unclean) {
-                mainHandler.post {
-                    showDialog(activity, prev, "上次运行诊断（已导出到 下载/goudong-diag.txt 并复制到剪贴板）")
+            // 上次非正常结束 → 自动导出；崩溃/卡死再弹一次摘要
+            val verdict = DiagLog.previousVerdict()
+            if (verdict == "crash" || verdict == "blocked" || verdict == "unclean") {
+                val ctx = activity.applicationContext ?: return
+                Thread {
+                    try {
+                        DiagExport.export(ctx, "prev-$verdict")
+                    } catch (_: Throwable) {
+                    }
+                }.apply { isDaemon = true }.start()
+                if (verdict != "unclean") {
+                    mainHandler.post {
+                        showDialog(activity, DiagExport.digest(), "上次运行诊断（$verdict）")
+                    }
                 }
             }
         } catch (_: Throwable) {
         }
     }
 
-    /** 1) 崩溃捕获：activity 为 null 时只落盘抓栈，不弹窗（早崩路径无 Activity 可用） */
-    @Volatile private var earlyApp: Context? = null
+    // ------------------------------------------------------------- crash
 
+    /** 1) 崩溃捕获：activity 为 null 时只落盘抓栈，不弹窗（早崩路径无 Activity 可用） */
     private fun installCrashHandler(activity: Activity?) {
         val prevHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { t, e ->
             try {
-                note("FATAL in ${t.name}: $e")
+                DiagLog.crash("CRASH", "crash.fatal", e, "thread" to t.name)
                 var cur: Throwable? = e
                 var depth = 0
                 while (cur != null && depth < 6) {
-                    for (fr in cur.stackTrace) note("    at $fr")
+                    DiagLog.crashTrace("exception: ${cur.javaClass.name}: ${cur.message}")
+                    for (fr in cur.stackTrace) DiagLog.crashTrace("    at $fr")
                     cur = cur.cause
-                    if (cur != null) note("Caused by: $cur")
+                    if (cur != null) DiagLog.crashTrace("Caused by: $cur")
                     depth++
                 }
+                DiagLog.flushSync()
             } catch (_: Throwable) {
             }
-            // 早崩直写公共 Download：私有目录可能不可写，这是最后一根取证线
+            // 正常导出 + 最后一根线（私有目录/MediaStore 都可能不可写的场景）
             try {
-                earlyApp?.let { exportEarly(it, readRaw(logFile ?: return@let)) }
+                val ctx = activity?.applicationContext ?: earlyApp
+                if (ctx != null) {
+                    DiagExport.export(ctx, "crash")
+                    exportEarly(ctx, DiagLog.snapshot(2000))
+                }
             } catch (_: Throwable) {
             }
             if (activity != null) {
                 try {
-                    mainHandler.post { showDialog(activity, readRaw(logFile ?: return@post), "崩溃报告（已落盘）") }
+                    mainHandler.post {
+                        showDialog(activity, DiagExport.digest(), "崩溃报告（已落盘到 下载/goudong-diag）")
+                    }
                 } catch (_: Throwable) {
                 }
                 try {
@@ -231,6 +192,8 @@ object CrashCatcher {
             System.exit(1)
         }
     }
+
+    // ----------------------------------------------------------- watchdog
 
     /** 2) 主线程心跳 + 卡死看门狗 */
     private fun installWatchdog() {
@@ -255,13 +218,22 @@ object CrashCatcher {
                     if (tick == last) {
                         stalled += 1000
                         if (stalled == 3000L) {
-                            note("BLOCKED: 主线程 3000ms 无进展（疑似卡死/ANR 前兆）")
+                            DiagLog.error(
+                                "WD", "wd.blocked",
+                                "msg" to "BLOCKED: 主线程 3000ms 无进展（疑似卡死/ANR 前兆）",
+                                "ms" to 3000, "since" to startedMs
+                            )
                             try {
                                 val st = Thread.getAllStackTraces()[mainThread]
                                 if (st != null) {
-                                    note("main thread stack at stall:")
-                                    for (fr in st) note("    at $fr")
+                                    DiagLog.crashTrace("main thread stack at stall:")
+                                    for (fr in st) DiagLog.crashTrace("    at $fr")
                                 }
+                            } catch (_: Throwable) {
+                            }
+                            try {
+                                DiagLog.flushNow(200)
+                                earlyApp?.let { DiagExport.export(it, "stall") }
                             } catch (_: Throwable) {
                             }
                         }
@@ -276,19 +248,30 @@ object CrashCatcher {
         watchdog.start()
     }
 
-    /** 把上次日志写到公共 Download 目录（MediaStore，Android 10+；无需存储权限） */
-    private fun exportToDownloads(activity: Activity, text: String) {
+    // ------------------------------------------------------------- export
+
+    /**
+     * 早崩/极端场景的最后一根取证线：直写公共 Download（唯一文件名，绝不覆盖别人）。
+     * 保留 MediaStore 直写而不再走 DiagExport，是为了「导出管线自身也可能失败」。
+     */
+    private fun exportEarly(app: Context, text: String) {
         try {
-            if (Build.VERSION.SDK_INT < 29) return
+            if (text.isBlank() || Build.VERSION.SDK_INT < 29) return
+            val name = "goudong-diag-emergency-" + SystemClock.elapsedRealtime() + ".txt"
             val values = android.content.ContentValues().apply {
-                put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, "goudong-diag.txt")
+                put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, name)
                 put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "text/plain")
-                put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, "Download")
+                put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, "Download/goudong-diag")
+                put(android.provider.MediaStore.MediaColumns.IS_PENDING, 1)
             }
-            val uri = activity.contentResolver.insert(
+            val uri = app.contentResolver.insert(
                 android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, values
             ) ?: return
-            activity.contentResolver.openOutputStream(uri)?.use { it.write(text.toByteArray()) }
+            app.contentResolver.openOutputStream(uri)?.use { it.write(text.toByteArray()) }
+            val done = android.content.ContentValues().apply {
+                put(android.provider.MediaStore.MediaColumns.IS_PENDING, 0)
+            }
+            app.contentResolver.update(uri, done, null, null)
         } catch (_: Throwable) {
         }
     }
@@ -301,25 +284,24 @@ object CrashCatcher {
         }
     }
 
-    private fun readRaw(f: File): String = try {
-        if (f.exists()) f.readText() else ""
-    } catch (_: Throwable) {
-        ""
-    }
-
     private fun showDialog(activity: Activity, text: String, title: String) {
         try {
             if (text.isBlank() || activity.isFinishing || activity.isDestroyed) return
-            val body = if (text.length > 3800) text.take(3800) + "\n…(截断)" else text
+            val body = if (text.length > 3800) text.take(3800) + "\n…(截断，完整内容见导出文件)" else text
             AlertDialog.Builder(activity)
                 .setTitle(title)
                 .setMessage(body)
-                .setPositiveButton("复制") { _, _ ->
-                    try {
-                        val cm = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        cm.setPrimaryClip(ClipData.newPlainText("goudong-diag", text))
-                    } catch (_: Throwable) {
-                    }
+                .setPositiveButton("复制摘要") { _, _ ->
+                    copyToClipboard(activity, DiagExport.digest())
+                }
+                .setNeutralButton("导出到下载") { _, _ ->
+                    val ctx = activity.applicationContext
+                    Thread {
+                        try {
+                            DiagExport.export(ctx, "manual")
+                        } catch (_: Throwable) {
+                        }
+                    }.apply { isDaemon = true }.start()
                 }
                 .setNegativeButton("关闭", null)
                 .show()

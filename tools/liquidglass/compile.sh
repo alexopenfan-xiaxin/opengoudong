@@ -150,6 +150,10 @@ FRAGMENT_JAR="$CACHE/fragment-$FRAGMENT_VERSION-classes.jar"
 SAVEDSTATE_JAR="$CACHE/savedstate-$SAVEDSTATE_VERSION-classes.jar"
 LIFECYCLE_JAR="$CACHE/lifecycle-runtime-android-$LIFECYCLE_VERSION-classes.jar"
 LIFECYCLE_COMMON_JAR="$CACHE/lifecycle-common-jvm-$LIFECYCLE_VERSION.jar"
+# 第 44 轮：Fragment / FragmentActivity 的父类型链需要 viewmodel（ViewModelStoreOwner /
+# HasDefaultViewModelProviderFactory）。只做编译期引用，运行时由 APK 自带。
+LIFECYCLE_VM_JAR="$CACHE/lifecycle-viewmodel-android-$LIFECYCLE_VERSION-classes.jar"
+LIFECYCLE_VM_SS_JAR="$CACHE/lifecycle-viewmodel-savedstate-$LIFECYCLE_VERSION-classes.jar"
 
 fetch "https://dl.google.com/dl/android/maven2/androidx/appcompat/appcompat/$APPCOMPAT_VERSION/appcompat-$APPCOMPAT_VERSION.aar" "$CACHE/appcompat-$APPCOMPAT_VERSION.aar"
 fetch "https://dl.google.com/dl/android/maven2/com/google/android/material/material/$MATERIAL_VERSION/material-$MATERIAL_VERSION.aar" "$CACHE/material-$MATERIAL_VERSION.aar"
@@ -158,6 +162,8 @@ fetch "https://dl.google.com/dl/android/maven2/androidx/fragment/fragment/$FRAGM
 fetch "https://dl.google.com/dl/android/maven2/androidx/savedstate/savedstate/$SAVEDSTATE_VERSION/savedstate-$SAVEDSTATE_VERSION.aar" "$CACHE/savedstate-$SAVEDSTATE_VERSION.aar"
 fetch "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-runtime-android/$LIFECYCLE_VERSION/lifecycle-runtime-android-$LIFECYCLE_VERSION.aar" "$CACHE/lifecycle-runtime-android-$LIFECYCLE_VERSION.aar"
 fetch "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-common-jvm/$LIFECYCLE_VERSION/lifecycle-common-jvm-$LIFECYCLE_VERSION.jar" "$LIFECYCLE_COMMON_JAR"
+fetch "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-viewmodel-android/$LIFECYCLE_VERSION/lifecycle-viewmodel-android-$LIFECYCLE_VERSION.aar" "$CACHE/lifecycle-viewmodel-android-$LIFECYCLE_VERSION.aar"
+fetch "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-viewmodel-savedstate/$LIFECYCLE_VERSION/lifecycle-viewmodel-savedstate-$LIFECYCLE_VERSION.aar" "$CACHE/lifecycle-viewmodel-savedstate-$LIFECYCLE_VERSION.aar"
 
 extract_aar "$CACHE/appcompat-$APPCOMPAT_VERSION.aar" "$APPCOMPAT_JAR"
 extract_aar "$CACHE/material-$MATERIAL_VERSION.aar" "$MATERIAL_JAR"
@@ -165,10 +171,23 @@ extract_aar "$CACHE/activity-$ACTIVITY_VERSION.aar" "$ACTIVITY_JAR"
 extract_aar "$CACHE/fragment-$FRAGMENT_VERSION.aar" "$FRAGMENT_JAR"
 extract_aar "$CACHE/savedstate-$SAVEDSTATE_VERSION.aar" "$SAVEDSTATE_JAR"
 extract_aar "$CACHE/lifecycle-runtime-android-$LIFECYCLE_VERSION.aar" "$LIFECYCLE_JAR"
-for j in "$APPCOMPAT_JAR" "$MATERIAL_JAR" "$ACTIVITY_JAR" "$FRAGMENT_JAR" "$SAVEDSTATE_JAR" "$LIFECYCLE_JAR" "$LIFECYCLE_COMMON_JAR"; do
+extract_aar "$CACHE/lifecycle-viewmodel-android-$LIFECYCLE_VERSION.aar" "$LIFECYCLE_VM_JAR"
+extract_aar "$CACHE/lifecycle-viewmodel-savedstate-$LIFECYCLE_VERSION.aar" "$LIFECYCLE_VM_SS_JAR"
+for j in "$APPCOMPAT_JAR" "$MATERIAL_JAR" "$ACTIVITY_JAR" "$FRAGMENT_JAR" "$SAVEDSTATE_JAR" "$LIFECYCLE_JAR" "$LIFECYCLE_COMMON_JAR" "$LIFECYCLE_VM_JAR" "$LIFECYCLE_VM_SS_JAR"; do
   [ -s "$j" ] || { echo "[compile] FATAL: missing $j" >&2; exit 1; }
 done
 log "round-9 compile-only deps ready (appcompat/material/activity/fragment/lifecycle/savedstate)"
+
+# --- 第 44 轮：OkHttp EventListener（网络埋点） ---------------------------- #
+# DiagNet 继承 okhttp3.EventListener；运行时类由 APK 的 classes13 提供，
+# 这里只做编译期引用。版本按 4.x 取（APK 内 okhttp3 已是 4.x 结构）。
+OKHTTP_VERSION="${OKHTTP_VERSION:-4.12.0}"
+OKIO_VERSION="${OKIO_VERSION:-3.6.0}"
+OKHTTP_JAR="$CACHE/okhttp-$OKHTTP_VERSION.jar"
+OKIO_JAR="$CACHE/okio-jvm-$OKIO_VERSION.jar"
+fetch "https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp/$OKHTTP_VERSION/okhttp-$OKHTTP_VERSION.jar" "$OKHTTP_JAR"
+fetch "https://repo1.maven.org/maven2/com/squareup/okio/okio-jvm/$OKIO_VERSION/okio-jvm-$OKIO_VERSION.jar" "$OKIO_JAR"
+log "round-44 compile-only deps ready (okhttp/$OKHTTP_VERSION okio/$OKIO_VERSION)"
 
 # --- android.jar (platform) ------------------------------------------------- #
 # 库源码用了 API 36 的符号（Build.VERSION_CODES.BAKLAVA / RuntimeXfermode /
@@ -206,7 +225,7 @@ log "compiling ${#SOURCES[@]} Kotlin files (language/api 1.9, jvm-target 11)"
   -api-version 1.9 \
   -jvm-target 11 \
   -nowarn \
-  -classpath "$STDLIB_JAR:$ANNOTATION_JAR:$CORE_JAR:$VP2_JAR:$RV_JAR:$APPCOMPAT_JAR:$MATERIAL_JAR:$ACTIVITY_JAR:$FRAGMENT_JAR:$SAVEDSTATE_JAR:$LIFECYCLE_JAR:$LIFECYCLE_COMMON_JAR:$ANDROID_JAR" \
+  -classpath "$STDLIB_JAR:$ANNOTATION_JAR:$CORE_JAR:$VP2_JAR:$RV_JAR:$APPCOMPAT_JAR:$MATERIAL_JAR:$ACTIVITY_JAR:$FRAGMENT_JAR:$SAVEDSTATE_JAR:$LIFECYCLE_JAR:$LIFECYCLE_COMMON_JAR:$LIFECYCLE_VM_JAR:$LIFECYCLE_VM_SS_JAR:$OKHTTP_JAR:$OKIO_JAR:$ANDROID_JAR" \
   -d "$OUT" \
   "${SOURCES[@]}"
 

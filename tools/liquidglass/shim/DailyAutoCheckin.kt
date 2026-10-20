@@ -149,7 +149,7 @@ object DailyAutoCheckin {
             start(activity, manual = false)
         } catch (t: Throwable) {
             CrashCatcher.note("DailyAutoCheckin.onAppForeground swallowed: $t")
-            Log.w(TAG, "onAppForeground failed", t)
+            DiagLog.warn("TASK", "daily.foreground.failed", t)
         }
     }
 
@@ -168,7 +168,7 @@ object DailyAutoCheckin {
             if (act != null) onAppForeground(act)
         } catch (t: Throwable) {
             CrashCatcher.note("DailyAutoCheckin.onDashboardLoaded swallowed: $t")
-            Log.w(TAG, "onDashboardLoaded failed", t)
+            DiagLog.warn("TASK", "daily.dashboard.failed", t)
         }
     }
 
@@ -182,7 +182,7 @@ object DailyAutoCheckin {
             refreshNote(ctx, view)
         } catch (t: Throwable) {
             CrashCatcher.note("DailyAutoCheckin.onTabRendered swallowed: $t")
-            Log.w(TAG, "onTabRendered failed", t)
+            DiagLog.warn("TASK", "daily.tab.failed", t)
         }
     }
 
@@ -219,7 +219,7 @@ object DailyAutoCheckin {
             prefs(ctx).edit().putBoolean(KEY_ENABLED, on).apply()
             CrashCatcher.note("DailyAutoCheckin: auto_daily_enabled=$on")
         } catch (t: Throwable) {
-            Log.w(TAG, "setEnabled failed", t)
+            DiagLog.warn("TASK", "daily.setEnabled.failed", t)
         }
     }
 
@@ -246,7 +246,7 @@ object DailyAutoCheckin {
             if (ok) e.putString(KEY_LAST_DAY, today())
             e.apply()
         } catch (t: Throwable) {
-            Log.w(TAG, "recordOutcome failed", t)
+            DiagLog.warn("TASK", "daily.record.failed", t)
         }
     }
 
@@ -370,7 +370,7 @@ object DailyAutoCheckin {
         try {
             GlassToast.show(host, note)
         } catch (t: Throwable) {
-            Log.w(TAG, "report toast failed", t)
+            DiagLog.warn("TASK", "daily.toast.failed", t)
         }
     }
 
@@ -384,7 +384,7 @@ object DailyAutoCheckin {
                 syncSwitch(act, holder)
                 syncNoteText(act, holder)
             } catch (t: Throwable) {
-                Log.w(TAG, "refreshAllToggles failed", t)
+                DiagLog.warn("TASK", "daily.toggles.failed", t)
             }
         }
     }
@@ -491,10 +491,10 @@ object DailyAutoCheckin {
 
             card.addView(holder, index.coerceIn(0, card.childCount))
             syncNoteText(ctx, holder)
-            Log.i(TAG, "auto-daily toggle installed next to 每日任务 (card children=${card.childCount})")
+            DiagLog.event("TASK", "daily.toggle.install", "children" to card.childCount)
         } catch (t: Throwable) {
             CrashCatcher.note("DailyAutoCheckin.installToggle swallowed: $t")
-            Log.w(TAG, "installToggle failed", t)
+            DiagLog.warn("TASK", "daily.toggle.install.failed", t)
         }
     }
 
@@ -554,7 +554,7 @@ object DailyAutoCheckin {
             val sm = services.javaClass.getMethod("getSessionManager").invoke(services) ?: return false
             sm.javaClass.getMethod("isAuthenticated").invoke(sm) as? Boolean ?: false
         } catch (t: Throwable) {
-            Log.w(TAG, "isAuthenticated probe failed", t)
+            DiagLog.warn("TASK", "daily.auth.probe.failed", t)
             false
         }
     }
@@ -564,7 +564,7 @@ object DailyAutoCheckin {
             val c = Class.forName("com.goudong.jd.AppServices", true, ctx.javaClass.classLoader)
             c.getField("INSTANCE").get(null)
         } catch (t: Throwable) {
-            Log.w(TAG, "AppServices not reachable", t)
+            DiagLog.warn("TASK", "daily.services.missing", t)
             null
         }
     }
@@ -574,7 +574,7 @@ object DailyAutoCheckin {
             val services = appServices(ctx)
             services?.javaClass?.getMethod("getPortalRepository")?.invoke(services)
         } catch (t: Throwable) {
-            Log.w(TAG, "portalRepository not reachable", t)
+            DiagLog.warn("TASK", "daily.repo.missing", t)
             null
         }
     }
@@ -618,7 +618,7 @@ object DailyAutoCheckin {
     private fun boolOf(target: Any, getter: String): Boolean = try {
         target.javaClass.getMethod(getter).invoke(target) as? Boolean ?: false
     } catch (t: Throwable) {
-        Log.w(TAG, "$getter failed", t)
+        DiagLog.warn("TASK", "daily.getter.failed", t, "fn" to getter)
         false
     }
 

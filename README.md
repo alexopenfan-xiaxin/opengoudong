@@ -21,9 +21,9 @@
 
 业务逻辑、账号体系、抢兑与账务规则**完全沿用官方服务端**，本项目不改变任何服务端行为。
 
-## 对比官方 2.11.40 做了什么
+## 对比官方 2.11.49 做了什么
 
-当前发行版 **2.11.44**（`versionCode 167`），功能基线对齐官方 **2.11.40**。
+当前发行版 **2.11.50**（`versionCode 176`），功能基线对齐官方 **2.11.49**。
 
 ### 一、视觉与交互
 
@@ -53,8 +53,8 @@
   以服务端 dashboard 的 `checkedInToday` / `prayedToday` 为准，本地只做当日节流；超时提示会指出卡在哪一段。
 - **酷狗抢兑入口**：点卡片就地展开「概念版 / 普通版」选择器，进入后不再有多余的页内版本 tab。
 - **饿了么抢兑入口**：同样就地展开「周五抢兑 / 日常抢兑」，跳过中间的「选择抢兑类型」页。
-- **跟随上游 2.11.40**：登录 / 会话链路重构（`MainActivity.authLauncher → AuthActivity`）、
-  酷狗抢兑「自动 / 手动参与」模式配置、ApiClient / 更新检查等杂项对齐。
+- **跟随上游 2.11.49**：新增**喜马拉雅抢兑**与**现金 / 分成**页面（入口钩子与 dock inset 一并接上）、
+  AppTypography 设计系统（保留本项目字号令牌与玻璃外观）、登录 / 会话链路与 ApiClient 对齐。
 - **关闭更新检查**：避免官方更新提示把本版本覆盖回官方包。
 - **JPush 静音**：包名变更后极光会弹「包名和 AppKey 不匹配」常驻通知，默认屏蔽推送初始化；
   若在 `tools/theme.json` 配置新的 `jpush.appkey` 则改为真修复（保留推送）。
@@ -63,9 +63,11 @@
 
 - 包名 `com.goudong.open`，独立应用名与图标，可与官方版**共存**；
 - **固定签名密钥**（`tools/signing/goudong-signing.keystore`）：本项目的版本之间可以互相覆盖安装；
-- **CrashCatcher 诊断器**：崩溃 / ANR 的主线程栈、启动面包屑写入应用私有日志，下次启动自动弹窗回放（无 adb 也能取证）；
-- **40 项产物断言**（`tools/liquidglass/verify.py`）：签名指纹、dex 数量、类与方法解析、补丁命中、版本号等，CI 不通过不出包；
-- 补丁脚本「命中数为 0 直接失败」，避免静默无效改动。
+- **包内诊断日志**：结构化事件（页面 / 点击 / 网络 / 崩溃 / 卡死），按会话轮转（256KB×4×3，旧会话自动淘汰）；
+  底部 dock 长按 0.7 秒打开诊断并导出到 `Download/goudong-diag/`（常驻一份 `goudong-diag-latest.txt`，不重名、不重复）；
+  推送进程只写独立的 `aux-pushcore.log`；无 adb 也能取证；
+- **45 项产物断言**（`tools/liquidglass/verify.py`）：签名指纹、dex 数量、类与方法解析、补丁命中、版本号等，CI 不通过不出包；
+- 补丁脚本「命中数为 0 直接失败」，避免静默无效改动；诊断逻辑另有 19 条纯逻辑自测（`tools/diag-selftest/`）。
 
 ## 安装
 
@@ -79,7 +81,7 @@
 
 ## 构建
 
-本项目不附带官方原始安装包。自行构建时，请使用你合法持有的官方 **2.11.40** APK，命名为 `goudong.apk` 放在仓库根目录。
+本项目不附带官方原始安装包。自行构建时，请使用你合法持有的官方 **2.11.49** APK，命名为 `goudong.apk` 放在仓库根目录。
 
 ```bash
 # 依赖：JDK 17、Node 20、Android build-tools r35（含 zipalign / apksigner / d8）、
@@ -88,7 +90,7 @@ bash tools/local-build.sh          # 增量构建（默认）
 bash tools/local-build.sh --full   # 全量：重新拉库源码 + 编译 shim + 解码
 ```
 
-产物 `build/goudong-patched.apk`，脚本结束会跑完 `verify.py` 的 40 项断言并打印 sha256。
+产物 `build/goudong-patched.apk`，脚本结束会跑完 `verify.py` 的 45 项断言并打印 sha256。
 
 也可以直接用 GitHub Actions：把 `goudong.apk` 放进仓库（或自行改成从 Release 下载），
 push 到 `main` 或打 `v*` tag 即出 artifact / Release。
@@ -105,7 +107,7 @@ push 到 `main` 或打 `v*` tag 即出 artifact / Release。
 | `tools/patch-*.mjs` | 分主题 / 分轮的 smali 文本锚点补丁，按构建顺序执行 |
 | `tools/theme.json` | 声明式主题：配色、应用名、图标、JPush 配置 |
 | `tools/liquidglass/shim/*.kt` | 自研 Kotlin 组件（玻璃、悬浮头、dock、抢兑选择器、自动打卡、诊断器） |
-| `tools/liquidglass/verify.py` | 产物断言门禁（40 项） |
+| `tools/liquidglass/verify.py` | 产物断言门禁（45 项） |
 | `tools/upstream-<ver>/` | 跟进上游版本时的三方合并产物（`replace/` `merge/` `add/` `delete.txt`） |
 | `docs/aegis/plans/` | 逐轮改动的根因、方案与真机验收记录 |
 

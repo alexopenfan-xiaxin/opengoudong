@@ -91,7 +91,7 @@ object FloatingHeader {
         } catch (t: Throwable) {
             // 悬浮化失败绝不影响页面可用性：退回「内容在 header 之下」的原布局
             CrashCatcher.note("FloatingHeader.attach swallowed: $t")
-            Log.w(TAG, "floating header attach failed; page keeps its original layout", t)
+            DiagLog.warn("UI", "ui.header.attach.failed", t)
         }
     }
 
@@ -215,7 +215,7 @@ object FloatingHeader {
         if (searchBox != null) {
             attachSearchAutoHide(scrollHost, searchBox)
         }
-        Log.d(TAG, "floating header attached: ${headers.size} header view(s)")
+        DiagLog.debug("UI", "ui.header.attach", "views" to headers.size)
     }
 
     /**
@@ -410,7 +410,7 @@ object FloatingHeader {
             host.post { apply() }
         } catch (t: Throwable) {
             CrashCatcher.note("FloatingHeader.attachHeaderInset swallowed: $t")
-            Log.w(TAG, "header inset attach failed; page keeps its original layout", t)
+            DiagLog.warn("UI", "ui.header.inset.failed", t)
         }
     }
 
@@ -509,7 +509,7 @@ object FloatingHeader {
             host.setTag(FIXED_ROW_TAG_KEY, base)
         } catch (t: Throwable) {
             CrashCatcher.note("FloatingHeader.attachFixedRow swallowed: $t")
-            Log.w(TAG, "fixed row attach failed; page keeps its original layout", t)
+            DiagLog.warn("UI", "ui.header.fixedRow.failed", t)
         }
     }
 

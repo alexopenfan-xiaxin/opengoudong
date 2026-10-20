@@ -39,7 +39,7 @@ object HomeFirstCut {
             renderInner(fragment, snapshot)
         } catch (t: Throwable) {
             val cause = (t as? InvocationTargetException)?.targetException ?: t
-            Log.e(TAG, "home reflow failed", cause)
+            DiagLog.error("HOME", "home.reflow.failed", cause)
             throw cause
         }
     }

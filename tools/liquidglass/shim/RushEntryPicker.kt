@@ -129,9 +129,9 @@ object RushEntryPicker {
             card.setOnClickListener {
                 toggle(ctx, panel, chevron)
             }
-            Log.i(TAG, "picker installed: ${kind.name} (host=${host?.javaClass?.name})")
+            DiagLog.event("RUSH", "rush.picker.install", "kind" to kind.name, "host" to (host?.javaClass?.name ?: "null"))
         } catch (t: Throwable) {
-            Log.w(TAG, "install failed: ${kind.name}", t)
+            DiagLog.warn("RUSH", "rush.picker.install.failed", t, "kind" to kind.name)
         }
     }
 
@@ -264,7 +264,7 @@ object RushEntryPicker {
             val list = cls.getMethod("getWithdrawHours").invoke(instance) as? List<*>
             list?.joinToString(" / ").orEmpty()
         } catch (t: Throwable) {
-            Log.w(TAG, "withdrawHours unavailable", t)
+            DiagLog.warn("RUSH", "rush.hours.unavailable", t)
             ""
         }
     }
@@ -313,9 +313,9 @@ object RushEntryPicker {
         collapse(ctx, panel, chevron)
         try {
             host?.javaClass?.getMethod(method)?.invoke(host)
-            Log.i(TAG, "enter via $method()")
+            DiagLog.event("RUSH", "rush.enter", "method" to method)
         } catch (t: Throwable) {
-            Log.w(TAG, "$method() failed", t)
+            DiagLog.warn("RUSH", "rush.enter.failed", t, "method" to method)
         }
     }
 

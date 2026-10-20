@@ -66,7 +66,7 @@ object CoinGlassHeader {
             } catch (_: Throwable) {
             }
             CrashCatcher.note("CoinGlassHeader.attach swallowed: $t")
-            Log.w(TAG, "coin glass header attach failed; page keeps its original filters", t)
+            DiagLog.warn("COIN", "coin.header.attach.failed", t)
         }
     }
 
@@ -141,7 +141,7 @@ object CoinGlassHeader {
         //    删除后页面退出仍走系统返回手势/返回键（宿主 onSupportNavigateUp 仍会 finish）。
         //    连同只为承载它而存在的 overlay 悬浮层一起去掉：overlay 的高度靠负 bottomMargin
         //    抵消，本身不占位，删掉不会影响下方滚动内容的布局。
-        Log.d(TAG, "coin glass header attached: ${entries.size} tabs (back fab removed in round 33)")
+        DiagLog.debug("COIN", "coin.header.attach", "tabs" to entries.size)
     }
 
     /** 反射读宿主 currentSource，换算成 entries 下标（读不到默认 0） */

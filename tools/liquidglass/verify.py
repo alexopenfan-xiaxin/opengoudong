@@ -10,7 +10,7 @@ NoSuchMethodError crash) and pins the stable signing key in #6 (install-conflict
 Round-10 hotfix adds #18 (nested capture gate + in-app CrashCatcher) and switches
 dynamic background to the documented static fallback (first-frame stall fix).
 Rounds 11-40 extend the gate to the per-round UI/product changes; the gate currently
-ships #1-#38. Round 39 (#37) replaces the kugou-rush entry's one-tap jump with a
+ships #1-#41. Round 39 (#37) replaces the kugou-rush entry's one-tap jump with a
 self-drawn expandable concept/std version picker and deletes the in-page version tab
 bar that #31/#33 used to pin (their kugou-hub checks were narrowed to match; the
 attachFixedRow capability those rounds added stays asserted as a shim API).
@@ -42,6 +42,8 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import difflib
+import gzip
 import os
 import re
 import struct
@@ -1532,12 +1534,12 @@ def assert_round21_changes(src_dir: str, smali_dec: str, smali14: str) -> None:
     yml = os.path.join(smali_dec, "apktool.yml")
     if not os.path.exists(yml):
         problems.append("apktool.yml missing")
-    elif "versionName: 2.11.44" not in io_open(yml):
-        problems.append("versionName is not 2.11.44")
+    elif "versionName: 2.11.50" not in io_open(yml):
+        problems.append("versionName is not 2.11.50")
 
     check(26, not problems, "; ".join(problems) if problems else
           "round-21: capsule animate + no-reload + serial GONE (5/page dots removed in round 30)"
-          " + early crash capture + version 2.11.44")
+          " + early crash capture + version 2.11.50")
 
 
 def assert_home_first_cut(smali_dec: str, smali14: str) -> None:
@@ -1731,8 +1733,8 @@ def assert_round23_changes(src_dir: str, smali_dec: str, smali14: str) -> None:
     yml = os.path.join(smali_dec, "apktool.yml")
     if not os.path.exists(yml):
         problems.append("apktool.yml missing")
-    elif "versionName: 2.11.44" not in io_open(yml):
-        problems.append("versionName is not 2.11.44")
+    elif "versionName: 2.11.50" not in io_open(yml):
+        problems.append("versionName is not 2.11.50")
 
     check(28, not problems, "; ".join(problems) if problems else
           "round-23: droplet animate + floating header + home order + fixed tabs + jd task"
@@ -1756,9 +1758,12 @@ def assert_round24_changes(src_dir: str, smali_dec: str, smali14: str) -> None:
             problems.append(f"{frag}.smali missing")
             continue
         t = io_open(p)
+        # 第 43 轮 hotfix：ElmRushHubFragment 的 `.locals` 只有 12，长帧会把 pN 推出 v15，
+        # 改走 attachFrom(View, Object)（dp 在 shim 内部换算），语义等同 attach。
         n = t.count("Lcom/example/liquidglass/RushDockInset;->attach(")
+        n += t.count("Lcom/example/liquidglass/RushDockInset;->attachFrom(")
         if n != 1:
-            problems.append(f"{frag}: RushDockInset.attach x{n} (expected 1)")
+            problems.append(f"{frag}: RushDockInset.attach(From) x{n} (expected 1)")
         heads = len(re.findall(r"^\.method ", t, re.M))
         ends = len(re.findall(r"^\.end method$", t, re.M))
         if heads != ends:
@@ -1854,12 +1859,12 @@ def assert_round24_changes(src_dir: str, smali_dec: str, smali14: str) -> None:
     else:
         problems.append("CoinLogActivity.smali missing")
 
-    # ---- 6) 版本号 2.11.44 ----
+    # ---- 6) 版本号 2.11.50 ----
     yml = os.path.join(smali_dec, "apktool.yml")
     if not os.path.exists(yml):
         problems.append("apktool.yml missing")
-    elif "versionName: 2.11.44" not in io_open(yml):
-        problems.append("versionName is not 2.11.44")
+    elif "versionName: 2.11.50" not in io_open(yml):
+        problems.append("versionName is not 2.11.50")
 
     # ---- 7) dex 侧：两个新 shim 类都编进了 classes14 ----
     for cls in ("RushDockInset", "CoinGlassHeader"):
@@ -1869,7 +1874,7 @@ def assert_round24_changes(src_dir: str, smali_dec: str, smali14: str) -> None:
 
     check(29, not problems, "; ".join(problems) if problems else
           "round-24: rush dock inset x7 + proxy unmount + coin glass header (4 tabs; back fab removed in round 33)"
-          " + pagination removed in round 30 + 2.11.44")
+          " + pagination removed in round 30 + 2.11.50")
 
 def assert_round25_changes(src_dir: str, smali_dec: str, smali14: str) -> None:
     """#30 第 30 轮：底部 tab 原样恢复到 lg20（去动画）+ 活动中心分页整体删除。"""
@@ -1994,8 +1999,8 @@ def assert_round25_changes(src_dir: str, smali_dec: str, smali14: str) -> None:
          "FloatingHeader round-32 full-height host")
 
     yml = os.path.join(smali_dec, "apktool.yml")
-    if not os.path.exists(yml) or "versionName: 2.11.44" not in io_open(yml):
-        problems.append("versionName is not 2.11.44")
+    if not os.path.exists(yml) or "versionName: 2.11.50" not in io_open(yml):
+        problems.append("versionName is not 2.11.50")
 
     for cls in ("BackdropCapture", "GlassKit", "LiquidGlassNavBar", "FloatingHeader", "RushDockInset", "CoinGlassHeader"):
         path = os.path.join(smali14, "com", "example", "liquidglass", f"{cls}.smali")
@@ -2011,7 +2016,7 @@ def assert_round25_changes(src_dir: str, smali_dec: str, smali14: str) -> None:
         problems.append("ActivityPageDots.smali still in classes14 (round-30 removal failed)")
 
     check(30, not problems, "; ".join(problems) if problems else
-          "round-30: dock restored verbatim to lg20 (no animation change) + activity pagination removed + 2.11.44")
+          "round-30: dock restored verbatim to lg20 (no animation change) + activity pagination removed + 2.11.50")
 
 
 def assert_no_undefined_regs(smali_dec: str) -> None:
@@ -2121,15 +2126,15 @@ def assert_round35_changes(src_dir: str, smali_dec: str, smali14: str) -> None:
         if heads != ends:
             problems.append(f"KugouRushHubFragment.smali: .method {heads} != .end method {ends}")
 
-    # ---- 3) 版本号 2.11.44 / versionCode 167 ----------------------------------
+    # ---- 3) 版本号 2.11.50 / versionCode 167 ----------------------------------
     yml = os.path.join(smali_dec, "apktool.yml")
     if not os.path.exists(yml):
         problems.append("apktool.yml missing")
     else:
         y = io_open(yml)
-        if "versionName: 2.11.44" not in y:
-            problems.append("versionName is not 2.11.44")
-        if not re.search(r"^\s*versionCode: 167$", y, re.M):
+        if "versionName: 2.11.50" not in y:
+            problems.append("versionName is not 2.11.50")
+        if not re.search(r"^\s*versionCode: 176$", y, re.M):
             problems.append("versionCode is not 167")
 
     check(31, not problems, "; ".join(problems) if problems else
@@ -2205,27 +2210,27 @@ def assert_round36_fixed_row(src_dir: str, smali_dec: str, smali14: str) -> None
         if "Lcom/example/liquidglass/GlassTabLayout;->" in t:
             problems.append("KugouRushHubFragment: the removed fixed-row tab came back")
 
-    # 发行号 2.11.44 / versionCode 167
+    # 发行号 2.11.50 / versionCode 167
     yml = os.path.join(smali_dec, "apktool.yml")
     if not os.path.exists(yml):
         problems.append("apktool.yml missing")
     else:
         y = io_open(yml)
-        if "versionName: 2.11.44" not in y:
-            problems.append("versionName is not 2.11.44")
-        if not re.search(r"^\s*versionCode: 167$", y, re.M):
+        if "versionName: 2.11.50" not in y:
+            problems.append("versionName is not 2.11.50")
+        if not re.search(r"^\s*versionCode: 176$", y, re.M):
             problems.append("versionCode is not 167")
 
     check(33, not problems, "; ".join(problems) if problems else
           "round-36: FloatingHeader.attachFixedRow capability intact (real window coordinates + "
           "row visibility self-heal + one-shot geometry diagnostics); the hub fixed tab row it "
-          "was written for was removed in round 39 (see #37) + 2.11.44")
+          "was written for was removed in round 39 (see #37) + 2.11.50")
 
 
 def assert_round37_ios26(src_dir: str, smali_dec: str, smali14: str) -> None:
     """#34 第 37/38 轮：iOS 26 全局重设计 —— 配色家族 / 字号阶 / Toast/对话框换库成品 /
     底栏收缩与触感 / 顶部 scroll-edge 与弹性动画 / Hub 固定页头定位（几何量法）/
-    玻璃只留在 chrome（内容卡与控件不玻璃，第 38 轮回退）/ 发行号 2.11.44。"""
+    玻璃只留在 chrome（内容卡与控件不玻璃，第 38 轮回退）/ 发行号 2.11.50。"""
     problems = []
     shim_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                             "liquidglass", "shim")
@@ -2318,12 +2323,12 @@ def assert_round37_ios26(src_dir: str, smali_dec: str, smali14: str) -> None:
         if not os.path.exists(p):
             problems.append(f"{cls}.smali missing in classes14")
 
-    # ---- 6) 发行号 2.11.44 ------------------------------------------------------
+    # ---- 6) 发行号 2.11.50 ------------------------------------------------------
     yml = os.path.join(smali_dec, "apktool.yml")
     if not os.path.exists(yml):
         problems.append("apktool.yml missing")
-    elif "versionName: 2.11.44" not in io_open(yml):
-        problems.append("versionName is not 2.11.44")
+    elif "versionName: 2.11.50" not in io_open(yml):
+        problems.append("versionName is not 2.11.50")
 
     check(34, not problems, "; ".join(problems) if problems else
           "round-37/38: iOS 26 palette + type scale (15sp/34sp) + LiquidGlassToast/DialogBuilder wired"
@@ -2562,8 +2567,11 @@ def assert_round39_kugou_entry_picker(src_dir: str, smali_dec: str, smali14: str
         n_call = t.count(call)
         if n_call != 1:
             problems.append(f"ProjectRushListFragment: picker wiring x{n_call} (expected 1)")
-        card = t.find('const-string v9, "\\u9177\\u72d7\\u62a2\\u5151"')
+        # 第 43 轮起入口卡片由上游 2.11.50 的 onCreateView 生成，寄存器号由 R8 决定
+        # （v2/v9 都会出现），只断言「卡片标题在 picker 调用之前」这一语义。
         at = t.find(call)
+        cards = [m.start() for m in re.finditer(r'const-string [vp]\d+, "\\u9177\\u72d7\\u62a2\\u5151"', t)]
+        card = max([p0 for p0 in cards if at >= 0 and p0 < at], default=-1)
         if card < 0:
             problems.append("ProjectRushListFragment lost the kugou entry card")
         elif at < card:
@@ -2605,21 +2613,21 @@ def assert_round39_kugou_entry_picker(src_dir: str, smali_dec: str, smali14: str
     if os.path.exists(dead):
         problems.append("dead tab-selected listener class KugouRushHubFragment$onCreateView$2$2 still present")
 
-    # 发行号 2.11.44 / versionCode 167（本轮的补丁链尾）
+    # 发行号 2.11.50 / versionCode 167（本轮的补丁链尾）
     yml = os.path.join(smali_dec, "apktool.yml")
     if not os.path.exists(yml):
         problems.append("apktool.yml missing")
     else:
         y = io_open(yml)
-        if "versionName: 2.11.44" not in y:
-            problems.append("versionName is not 2.11.44")
-        if not re.search(r"^\s*versionCode: 167$", y, re.M):
+        if "versionName: 2.11.50" not in y:
+            problems.append("versionName is not 2.11.50")
+        if not re.search(r"^\s*versionCode: 176$", y, re.M):
             problems.append("versionCode is not 167")
 
     check(37, not problems, "; ".join(problems) if problems else
           "round-39: kugou rush entry expands a self-drawn version picker (concept / std) instead of "
           "jumping straight into the concept page; the in-page concept/std glass tab bar is fully "
-          "removed (view + field + fixed-row wiring + dead listener) + 2.11.44")
+          "removed (view + field + fixed-row wiring + dead listener) + 2.11.50")
 
 
 def assert_round40_elm_entry_picker(src_dir: str, smali_dec: str, smali14: str) -> None:
@@ -2638,7 +2646,7 @@ def assert_round40_elm_entry_picker(src_dir: str, smali_dec: str, smali14: str) 
       2) classes14 产物里 `installElm` 与两个反射目标都在；
       3) 调用点：`ProjectRushListFragment` 的饿了么卡片**之后**恰好接一次 `installElm`，
          且酷狗那次 `installKugou` 也还在（两个入口互不覆盖）；
-      4) 版本 2.11.44 / 167。
+      4) 版本 2.11.50 / 167。
     """
     problems = []
 
@@ -2682,8 +2690,10 @@ def assert_round40_elm_entry_picker(src_dir: str, smali_dec: str, smali14: str) 
         n_call = t.count(call)
         if n_call != 1:
             problems.append(f"ProjectRushListFragment: elm picker wiring x{n_call} (expected 1)")
-        card = t.find('const-string v8, "\\u997f\\u4e86\\u4e48\\u62a2\\u5151"')
+        # 同上：寄存器号不再写死，只断言卡片标题在 elm picker 调用之前。
         at = t.find(call)
+        cards = [m.start() for m in re.finditer(r'const-string [vp]\d+, "\\u997f\\u4e86\\u4e48\\u62a2\\u5151"', t)]
+        card = max([p0 for p0 in cards if at >= 0 and p0 < at], default=-1)
         if card < 0:
             problems.append("ProjectRushListFragment lost the elm entry card")
         elif at < card:
@@ -2710,15 +2720,15 @@ def assert_round40_elm_entry_picker(src_dir: str, smali_dec: str, smali14: str) 
         problems.append("apktool.yml missing")
     else:
         y = io_open(yml)
-        if "versionName: 2.11.44" not in y:
-            problems.append("versionName is not 2.11.44")
-        if not re.search(r"^\s*versionCode: 167$", y, re.M):
+        if "versionName: 2.11.50" not in y:
+            problems.append("versionName is not 2.11.50")
+        if not re.search(r"^\s*versionCode: 176$", y, re.M):
             problems.append("versionCode is not 167")
 
     check(38, not problems, "; ".join(problems) if problems else
           "round-40: elm rush entry expands the same self-drawn picker (周五抢兑 / 日常抢兑) and "
           "jumps straight in — the intermediate type-selection page is no longer entered; the shim "
-          "is generalized to RushEntryPicker (one panel implementation, one tag per kind) + 2.11.44")
+          "is generalized to RushEntryPicker (one panel implementation, one tag per kind) + 2.11.50")
 
 
 def _round41_join_smali(smali14: str, prefix: str) -> tuple[bool, str]:
@@ -2762,7 +2772,7 @@ def assert_round41_daily_auto_checkin(src_dir: str, smali_dec: str, smali14: str
       4) 汇报结果三条出口：玻璃 Toast、任务页小字、CrashCatcher 诊断行；
       5) 开关安装点：`TasksFragment.applyDashboard` 与 `renderCurrentTab` 各恰好一次，
          且都在对应方法内部；开关是 `SwitchCompat`（appcompat 1.7.0，与包内版本一致）；
-      6) 版本 2.11.44 / 167。
+      6) 版本 2.11.50 / 167。
     """
     problems = []
 
@@ -2873,16 +2883,16 @@ def assert_round41_daily_auto_checkin(src_dir: str, smali_dec: str, smali14: str
         problems.append("apktool.yml missing")
     else:
         y = io_open(yml)
-        if "versionName: 2.11.44" not in y:
-            problems.append("versionName is not 2.11.44")
-        if not re.search(r"^\s*versionCode: 167$", y, re.M):
+        if "versionName: 2.11.50" not in y:
+            problems.append("versionName is not 2.11.50")
+        if not re.search(r"^\s*versionCode: 176$", y, re.M):
             problems.append("versionCode is not 167")
 
     check(39, not problems, "; ".join(problems) if problems else
           "round-41: daily auto check-in + pray on the first foreground of the day (ON by default), "
           "gated by login + a same-day local marker AND the server-side dashboard truth, reported through "
           "a glass toast / a caption under the task card / the in-package diagnostic log; the "
-          "toggle sits next to the 每日任务 title; no new build dependency + 2.11.44")
+          "toggle sits next to the 每日任务 title; no new build dependency + 2.11.50")
 
 
 # --------------------------------------------------------------------------- #
@@ -2989,6 +2999,510 @@ def assert_round42_upstream_2_11_40(smali_dec: str) -> None:
           "BuildConfig version consistent with apktool.yml")
 
 
+# #41 上游 2.11.50 跟进（第 43 轮）
+# --------------------------------------------------------------------------- #
+def assert_round43_upstream_2_11_49(smali_dec: str) -> None:
+    """
+    第 43 轮把上游 2.11.50 移植进开源版（判定链见 tools/upstream-2.11.50/tooling/）：
+
+      * 喜马拉雅抢兑：`XmlyRushFragment` / `XmlyTimeHelper` / 12 个 Xmly 模型 +
+        `PortalRepository.fetchXmlyAccounts / scheduleXmlyWithdraw / queryXmlyLevels`；
+        抢兑入口在 `ProjectRushFragment.openXmly()`（列表页第 4 张卡）。
+      * 现金与分成：`PortalCashBalance` / `PortalCashLog` / `CashLogSheet` /
+        `CashLogActivity` / `RevenueShareSupport`。
+      * 设计系统：`AppTextStyle` / `AppTypography` / `AppTypographyKt`（文本尺寸统一走
+        setTextSp/appText）+ `R$color` 新增 partner/tint 颜色（与 public.xml id 对齐）。
+      * 我方不变量必须活过移植：两个入口选择器（`RushEntryPicker.installKugou/installElm`）、
+        `RushDockInset`、活动序号隐藏、更新检查禁用桩。
+
+    反向注入验证：build/r43-reverse-injection.py。
+    """
+    problems = []
+
+    def app(rel: str) -> str:
+        return os.path.join(smali_dec, rel)
+
+    # 1) 2.11.50 新类落地
+    for rel in (
+        "smali_classes9/com/goudong/jd/ui/projects/XmlyRushFragment.smali",
+        "smali_classes9/com/goudong/jd/ui/projects/XmlyTimeHelper.smali",
+        "smali_classes3/com/goudong/jd/data/model/XmlyAccount.smali",
+        "smali_classes3/com/goudong/jd/data/model/XmlyPortalConfig.smali",
+        "smali_classes6/com/goudong/jd/ui/tasks/CashLogSheet.smali",
+        "smali_classes10/com/goudong/jd/ui/more/CashLogActivity.smali",
+        "smali_classes3/com/goudong/jd/data/model/PortalCashLog.smali",
+        "smali_classes11/com/goudong/jd/ui/common/RevenueShareSupport.smali",
+        "smali_classes11/com/goudong/jd/ui/common/AppTypography.smali",
+        "smali_classes11/com/goudong/jd/ui/common/AppTextStyle.smali",
+        "smali_classes3/com/goudong/jd/data/model/ElmDailyTaskView.smali",
+    ):
+        if not os.path.exists(app(rel)):
+            problems.append(f"missing 2.11.50 class: {rel}")
+
+    # 2) 喜马拉雅抢兑接线（列表页入口 -> ProjectRushFragment.openXmly -> XmlyRushFragment）
+    prf = app("smali_classes9/com/goudong/jd/ui/projects/ProjectRushFragment.smali")
+    if not os.path.exists(prf):
+        problems.append("ProjectRushFragment.smali missing")
+    else:
+        t = io_open(prf)
+        if "openXmly()V" not in t or "XmlyRushFragment" not in t:
+            problems.append("ProjectRushFragment: xmly entry (openXmly -> XmlyRushFragment) missing")
+    repo = app("smali_classes12/com/goudong/jd/data/repo/PortalRepository.smali")
+    if not os.path.exists(repo):
+        problems.append("PortalRepository.smali missing")
+    else:
+        t = io_open(repo)
+        # 必须真的是「方法声明」，而不是只剩调用点（重命名/删方法都能被这里抓到）
+        for needle in ("fetchXmlyAccounts", "scheduleXmlyWithdraw", "queryXmlyLevels",
+                       "fetchCashBalance", "fetchCashLogs"):
+            if not re.search(r'\.method [^\n]*\b' + needle + r'\(', t):
+                problems.append(f"PortalRepository missing 2.11.50 API: {needle}")
+
+    # 3) 我方跨轮不变量（移植后必须仍在）
+    rush = app("smali_classes9/com/goudong/jd/ui/projects/ProjectRushListFragment.smali")
+    if not os.path.exists(rush):
+        problems.append("ProjectRushListFragment.smali missing")
+    else:
+        t = io_open(rush)
+        for needle in ("RushEntryPicker;->installKugou(", "RushEntryPicker;->installElm(",
+                       "RushDockInset;->attach"):
+            if needle not in t:
+                problems.append(f"ProjectRushListFragment: our hook lost in port ({needle})")
+        if r'\u559c\u9a6c\u62c9\u96c5' not in t and "喜马拉雅" not in t:
+            problems.append("ProjectRushListFragment: xmly rush card missing")
+    # 3b) 第 43 轮 hotfix：钩子块必须只用「方法既有局部量之外」的新寄存器。
+    # 复用既有局部量会在控制流汇合点造成 ART VerifyError
+    # （真机: "register v6 has type Reference: ProjectRushFragment but expected Integer"）。
+    for rel, marks in (
+        ("smali_classes9/com/goudong/jd/ui/projects/ProjectRushListFragment.smali",
+         ("第 43 轮：", "round-24 dock inset")),
+        ("smali_classes9/com/goudong/jd/ui/projects/ElmRushHubFragment.smali",
+         ("round-24 dock inset",)),
+    ):
+        path = app(rel)
+        if not os.path.exists(path):
+            continue
+        src = io_open(path)
+        head = src.find("onCreateView(Landroid/view/LayoutInflater;")
+        if head < 0:
+            problems.append(f"{os.path.basename(rel)}: onCreateView missing")
+            continue
+        end = src.find(".end method", head)
+        body = src[head:end].split("\n")
+        hook_line = set()
+        for i, ln in enumerate(body):
+            if any(mk in ln for mk in marks) and "#" in ln:
+                j = i
+                while j < len(body) and "RushEntryPicker;->install" not in body[j] \
+                        and "RushDockInset;->attach" not in body[j]:
+                    j += 1
+                for k in range(i, min(j + 1, len(body))):
+                    hook_line.add(k)
+        # hook 块「写入」的寄存器（move-object/move-result/const 的目标）必须是新开的；
+        # 从既有局部量读（move-object/from16 vNew, vOld）是允许的。
+        dest_re = re.compile(
+            r'\b(?:move-object(?:/from16)?|move-result(?:-object)?|const(?:/4|/16|/high16)?|move(?:/from16)?)\s+(v\d+),')
+        hook_dest, other_regs = set(), set()
+        for i, ln in enumerate(body):
+            if i in hook_line:
+                m = dest_re.search(ln)
+                if m:
+                    hook_dest.add(m.group(1))
+            else:
+                other_regs.update(re.findall(r'\b([vp]\d+)\b', ln))
+        shared = sorted(hook_dest & other_regs, key=lambda r: int(r[1:]))
+        if shared:
+            problems.append(
+                f"{os.path.basename(rel)}.onCreateView: hook shares method locals {shared} "
+                f"(ART VerifyError risk — allocate fresh registers past .locals)")
+
+    elmhub = app("smali_classes9/com/goudong/jd/ui/projects/ElmRushHubFragment.smali")
+    if os.path.exists(elmhub) and "RushDockInset;->attach" not in io_open(elmhub):
+        problems.append("ElmRushHubFragment: dock inset lost in port")
+    elm = app("smali_classes9/com/goudong/jd/ui/projects/ElmDailyRushFragment.smali")
+    if os.path.exists(elm):
+        t = io_open(elm)
+        for stale in ("canStartMidnightNow", "startCountdown(Ljava/lang/String;Ljava/lang/String;)V"):
+            if stale in t:
+                problems.append(f"ElmDailyRushFragment: stale 2.11.40 method survived port ({stale})")
+    tasks = app("smali_classes6/com/goudong/jd/ui/tasks/TasksFragment.smali")
+    if os.path.exists(tasks) and "renderRechargeHubCard" not in io_open(tasks):
+        problems.append("TasksFragment: 2.11.50 recharge hub card missing")
+    home = app("smali_classes4/com/goudong/jd/ui/home/HomeFragment.smali")
+    if os.path.exists(home) and "RevenueShareSupport" not in io_open(home) and "coinLogCard" not in io_open(home):
+        problems.append("HomeFragment: round-21 coin-log card lost in port")
+
+    # 3c) 第 43 轮 hotfix #2：replay 把上游行换成我方行时寄存器必须一致。
+    # 若上游是 `new-instance v7` 而我们写成 `new-instance v8`，后面的 `move-object v9, v7`
+    # 会把别的类型（常见是 const-string）带进 widget 变量 → 真机
+    #   VerifyError: 'this' argument 'Reference: java.lang.String' not instance of 'Reference: android.widget.TextView'
+    # 这里对「双方都改过」的 21 个文件做一次线性类型传播检查（高置信度、零噪音）。
+    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    merge_txt = os.path.join(repo_root, "tools", "upstream-2.11.50", "tooling", "merge.txt")
+    merge_files = []
+    if os.path.exists(merge_txt):
+        merge_files = [x.strip() for x in io_open(merge_txt).split("\n") if x.strip()]
+    else:
+        mdir = os.path.join(repo_root, "tools", "upstream-2.11.50", "merge")
+        for dp, _dn, fn in os.walk(mdir):
+            for name in fn:
+                if name.endswith(".smali"):
+                    merge_files.append(os.path.relpath(os.path.join(dp, name), mdir))
+    widget_re = re.compile(
+        r'^Landroid/widget/(TextView|EditText|Button|ImageView|LinearLayout|FrameLayout|View|'
+        r'CompoundButton|CheckBox|RadioButton|ScrollView);$')
+    invoke_re = re.compile(r'\binvoke-\w+(?:/range)?\s*\{([^}]*)\},\s*(L[^;]+;)->')
+    moveobj_re = re.compile(r'move-object(?:/from16)?\s+([vp]\d+),\s*([vp]\d+)')
+    strres_re = re.compile(r'move-result-object\s+([vp]\d+)')
+    conststr_re = re.compile(r'const-string(?:/jumbo)?\s+([vp]\d+)')
+    write_re = re.compile(
+        r'\b(?:const(?:/4|/16|/high16|/string)?|move(?:/from16|/object|/object/from16|/wide|/result)?|'
+        r'move-result(?:-object|-wide)?|new-instance|new-array|iget\w*|sget\w*|aget\w*|check-cast)\s+([vp]\d+)')
+
+    def _scan_method(body, rel, out):
+        tags = {}
+        last_str = False
+        for idx, ln in enumerate(body):
+            st = ln.strip()
+            if (not st or st.startswith('#') or st.startswith('.line') or st.startswith('.local')
+                    or st.startswith('.end local') or st.startswith('.restart local')
+                    or st.startswith('.param') or st.startswith('.prologue') or st.startswith('.end param')):
+                continue
+            if st.startswith(':') or st.startswith('.catch'):
+                tags.clear()
+                continue
+            m = invoke_re.search(st)
+            if m:
+                args = [a.strip() for a in m.group(1).split(',') if a.strip()]
+                if args and widget_re.match(m.group(2)) and tags.get(args[0]) == 'string':
+                    out.append(f"{os.path.basename(rel)}:{idx + 1}: {m.group(2)} receiver "
+                               f"{args[0]} holds a String")
+                last_str = bool(re.search(r'\)Ljava/lang/String;$', st))
+                continue
+            if 'move-result-object' in st:
+                mm = strres_re.search(st)
+                if mm:
+                    tags[mm.group(1)] = 'string' if last_str else 'other'
+                continue
+            if 'move-object' in st:
+                mm = moveobj_re.search(st)
+                if mm:
+                    tags[mm.group(1)] = tags.get(mm.group(2))
+                continue
+            if 'const-string' in st:
+                mm = conststr_re.search(st)
+                if mm:
+                    tags[mm.group(1)] = 'string'
+                continue
+            mm = write_re.search(st)
+            if mm:
+                tags[mm.group(1)] = 'other'
+
+    # 3d) 第 43 轮 hotfix #2 的通用版：把「上游原文」压缩存档在 merge-basis/，
+    # 对每个方法逐条归一化（寄存器→R、玻璃类→LGLASS）后比对。若同一条指令
+    # 形状相同但寄存器号变了（如上游 new-instance v7 / 我们写成 v8），说明 replay
+    # 把上游寄存器号一起换了 —— 后面引用该寄存器的行会指向错误类型（真机 VerifyError）。
+    basis = os.path.join(repo_root, "tools", "upstream-2.11.50", "tooling", "merge-basis")
+    OURS_ONLY = {
+        "smali_classes11/com/goudong/jd/ui/common/UiKitKt.smali",
+        "smali_classes11/com/goudong/jd/ui/common/UiKitKt$$ExternalSyntheticLambda2.smali",
+        "smali_classes9/com/goudong/jd/update/UpdateChecker.smali",
+    }
+
+    def _shape(line):
+        t = line.strip()
+        t = t.replace("Landroid/widget/EditText;", "LGLASS;").replace(
+            "Lcom/example/liquidglass/GlassEditText;", "LGLASS;")
+        t = t.replace("Landroid/widget/Button;", "LGLASS;").replace(
+            "Lcom/example/liquidglass/GlassButton;", "LGLASS;")
+        return re.sub(r'\b[vp]\d+\b', 'R', t)
+
+    def _regs(line):
+        return re.findall(r'\b[vp]\d+\b', line)
+
+    def _methods_of(lines):
+        out, cur, buf = {}, None, []
+        for ln in lines:
+            if ln.startswith('.method'):
+                cur, buf = ln.strip(), []
+            elif ln.startswith('.end method'):
+                if cur:
+                    out[cur] = buf
+                cur = None
+            elif cur is not None:
+                buf.append(ln)
+        return out
+
+    reg_drift = []
+    if os.path.isdir(basis):
+        for dp, _dn, fn in os.walk(basis):
+            for name in fn:
+                if not name.endswith(".smali.gz"):
+                    continue
+                rel = os.path.relpath(os.path.join(dp, name), basis)[:-3]
+                if rel in OURS_ONLY:
+                    continue
+                dst = os.path.join(smali_dec, rel)
+                if not os.path.exists(dst):
+                    continue
+                with gzip.open(os.path.join(dp, name), "rt", encoding="utf-8", errors="replace") as f:
+                    up = _methods_of(f.read().split("\n"))
+                mine = _methods_of(io_open(dst).split("\n"))
+                for sig, ulines in up.items():
+                    if sig not in mine:
+                        continue
+                    a = [x for x in ulines if x.strip()]
+                    b = [x for x in mine[sig] if x.strip()]
+                    sm = difflib.SequenceMatcher(a=a, b=b, autojunk=False)
+                    for tag, i1, i2, j1, j2 in sm.get_opcodes():
+                        if tag != "replace" or (i2 - i1) != (j2 - j1):
+                            continue
+                        for x, y in zip(a[i1:i2], b[j1:j2]):
+                            if _shape(x) == _shape(y) and _regs(x) != _regs(y):
+                                reg_drift.append(f"{os.path.basename(rel)} {sig.split('(')[0]}: "
+                                                 f"{_regs(x)} -> {_regs(y)}")
+    if reg_drift:
+        problems.append("replay changed register numbers (upstream mismatch): " + "; ".join(reg_drift[:6]))
+
+    bad = []
+    for rel in merge_files:
+        path = os.path.join(smali_dec, rel)
+        if not os.path.exists(path):
+            continue
+        body = []
+        for ln in io_open(path).split("\n"):
+            if ln.startswith('.method'):
+                body = []
+            elif ln.startswith('.end method'):
+                if body:
+                    _scan_method(body, rel, bad)
+            else:
+                body.append(ln)
+    if bad:
+        problems.append("string-typed widget receiver (replay register mismatch): " + "; ".join(bad[:6]))
+
+    # 3e) shim 静态调用契约：app 侧 `invoke-static` 调到的 liquidglass 方法，
+    # 在 classes14 里必须真的声明为 static。
+    # （第 43 轮 hotfix #3 真机：@JvmStatic 被后面的新函数「抢走」，attach 变实例方法 →
+    #   IncompatibleClassChangeError: ... expected to be of type static but ... virtual）
+    shim14 = os.path.join(smali_dec, "smali_classes14", "com", "example", "liquidglass")
+    static_map = {}
+    if os.path.isdir(shim14):
+        for name in os.listdir(shim14):
+            if not name.endswith(".smali"):
+                continue
+            cls = "Lcom/example/liquidglass/" + name[:-6] + ";"
+            for ln in io_open(os.path.join(shim14, name)).split("\n"):
+                m = re.match(r'\.method\s+(.*?)\s+([A-Za-z0-9_$<>]+)\(', ln)
+                if m:
+                    flags = m.group(1).split()
+                    static_map.setdefault((cls, m.group(2)), set()).add("static" in flags)
+    icce = []
+    for path in _smali_files(smali_dec):
+        if "/com/goudong/" not in path.replace(os.sep, "/"):
+            continue
+        for ln in io_open(path).split("\n"):
+            if "invoke-static" not in ln or "Lcom/example/liquidglass/" not in ln:
+                continue
+            m = re.search(r'\},\s*(Lcom/example/liquidglass/[^;]+;)->([A-Za-z0-9_$<>]+)\(', ln)
+            if not m:
+                continue
+            key = (m.group(1), m.group(2))
+            flags = static_map.get(key)
+            if flags is not None and True not in flags:
+                icce.append(f"{os.path.basename(path)} -> {m.group(1)}.{m.group(2)}")
+    if icce:
+        problems.append("invoke-static on non-static shim method (ICCE risk): " + "; ".join(sorted(set(icce))[:6]))
+
+    # 4) 资源：新颜色 + 我方 iOS 调色 + public.xml/R$color id 对齐
+    colors = app("res/values/colors.xml")
+    if not os.path.exists(colors):
+        problems.append("res/values/colors.xml missing")
+    else:
+        t = io_open(colors)
+        for name in ("partner_alipay", "partner_alipay_soft", "partner_wechat_soft",
+                     "tint_negative_soft", "goudong_bg_scrim"):
+            if f'name="{name}"' not in t:
+                problems.append(f"colors.xml missing {name}")
+        if "#FF0A84FF" not in t:
+            problems.append("colors.xml: our iOS palette (brand_primary #FF0A84FF) lost")
+    pub = app("res/values/public.xml")
+    rcol = app("smali_classes2/com/goudong/jd/R$color.smali")
+    if os.path.exists(pub) and os.path.exists(rcol):
+        m = re.search(r"partner_alipay:I = (0x[0-9a-fA-F]+)", io_open(rcol))
+        if not m:
+            problems.append("R$color.smali missing partner_alipay")
+        elif f'name="partner_alipay" id="{m.group(1)}"' not in io_open(pub):
+            problems.append("public.xml id mismatch for partner_alipay (R$color drift)")
+    else:
+        problems.append("public.xml / R$color.smali missing")
+
+    # 5) 版本：上游 2.11.49 + 本地发行 2.11.50 / versionCode 176
+    yml = os.path.join(smali_dec, "apktool.yml")
+    bc = app("smali_classes7/com/goudong/jd/BuildConfig.smali")
+    if os.path.exists(yml):
+        t = io_open(yml)
+        if "versionName: 2.11.50" not in t or "versionCode: 176" not in t:
+            problems.append("apktool.yml is not 2.11.50 (176)")
+    if os.path.exists(bc):
+        t = io_open(bc)
+        if 'VERSION_NAME:Ljava/lang/String; = "2.11.50"' not in t or "VERSION_CODE:I = 176" not in t:
+            problems.append("BuildConfig is not 2.11.50 (176)")
+
+    check(41, not problems, "; ".join(problems) if problems else
+          "upstream 2.11.49 ported (round 43): xmly rush + cash/revenue-share + design system in place, "
+          "our rush pickers / dock inset / palette survived, release version 2.11.50 (176)")
+
+
+def _shim_dir() -> str:
+    return os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                        "liquidglass", "shim")
+
+
+def assert_diag_core(smali14: str) -> None:
+    """#42 第 44 轮：结构化日志核心（会话 / 环形 / 异步 / 轮转 / 多进程门）"""
+    problems = []
+    shim = _shim_dir()
+    need = ("DiagFormat.kt", "DiagLog.kt", "DiagExport.kt", "DiagTrace.kt", "DiagNet.kt", "DiagUi.kt")
+    for name in need:
+        if not os.path.exists(os.path.join(shim, name)):
+            problems.append(f"{name} missing in shim")
+
+    log = os.path.join(shim, "DiagLog.kt")
+    if os.path.exists(log):
+        t = io_open(log)
+        for needle in ("SEG_BYTES", "MAX_SESSIONS", "ArrayBlockingQueue<Rec>(QUEUE_MAX)",
+                       "Thread({ writerLoop() }, \"gd-log\")", "rotationAction",
+                       "processName(", "aux-", "collapseKey", "session.bg"):
+            if needle not in t:
+                problems.append(f"DiagLog missing {needle}")
+
+    catcher = os.path.join(shim, "CrashCatcher.kt")
+    if os.path.exists(catcher):
+        c = io_open(catcher)
+        for needle in ("DiagLog.install", "DiagExport.export", "DiagTrace.attach"):
+            if needle not in c:
+                problems.append(f"CrashCatcher does not delegate to {needle}")
+        if "appendText(" in c or 'writeText("")' in c:
+            problems.append("CrashCatcher still owns unbounded append/truncate")
+
+    for cls in ("DiagLog", "DiagExport", "DiagTrace", "DiagNet", "DiagUi"):
+        if not os.path.exists(os.path.join(smali14, "com", "example", "liquidglass", f"{cls}.smali")):
+            problems.append(f"{cls} not compiled into classes14")
+
+    check(42, not problems, "; ".join(problems) if problems else
+          "structured logger in place (session / ring buffer / async writer / rotation / "
+          "retention / process gate); CrashCatcher keeps only crash+watchdog and delegates")
+
+
+def assert_diag_export() -> None:
+    """#43 第 44 轮：导出命名唯一 + 常驻 latest 原地覆盖 + 去重 + 保留上限"""
+    problems = []
+    shim = _shim_dir()
+    f = os.path.join(shim, "DiagExport.kt")
+    if not os.path.exists(f):
+        problems.append("DiagExport.kt missing in shim")
+    else:
+        t = io_open(f)
+        for needle in ("goudong-diag-latest.txt", "KEEP = 5", "Download/goudong-diag",
+                       "openOutputStream(existing", "sha256(", "OWNER_PACKAGE_NAME",
+                       "IS_PENDING", "export.skip"):
+            if needle not in t:
+                problems.append(f"DiagExport missing {needle}")
+        if '"goudong-diag.txt"' in t:
+            problems.append("DiagExport still uses the fixed old display name")
+        if "insert(collection, values)" not in t:
+            problems.append("DiagExport does not write via MediaStore insert")
+    check(43, not problems, "; ".join(problems) if problems else
+          "export policy: one canonical latest file (overwritten in place) + unique timestamped "
+          "snapshots capped at 5 + sha256 dedupe + owner-scoped pruning")
+
+
+def assert_diag_coverage() -> None:
+    """#44 第 44 轮：页面 / 点击 / 组件日志覆盖（补「操作日志覆盖不到」）"""
+    problems = []
+    shim = _shim_dir()
+    trace = os.path.join(shim, "DiagTrace.kt")
+    if not os.path.exists(trace):
+        problems.append("DiagTrace.kt missing in shim")
+    else:
+        t = io_open(trace)
+        for needle in ("app.registerActivityLifecycleCallbacks(OBJECT_CALLBACKS)",
+                       "fm.registerFragmentLifecycleCallbacks(",
+                       ": Window.Callback", "w.callback = DiagWindowCallback(",
+                       "delegate.dispatchTouchEvent(event)", "MotionEvent.ACTION_UP",
+                       "getGlobalVisibleRect", "ui.act.resume", "ui.frag.resume"):
+            if needle not in t:
+                problems.append(f"DiagTrace missing {needle}")
+
+    ui = os.path.join(shim, "DiagUi.kt")
+    if not os.path.exists(ui):
+        problems.append("DiagUi.kt missing in shim")
+    else:
+        u = io_open(ui)
+        for needle in ("AboutVersionActivity", "infoRow", "DiagExport.export", "clearHistory"):
+            if needle not in u:
+                problems.append(f"DiagUi missing {needle}")
+
+    nav = os.path.join(shim, "LiquidGlassNavBar.kt")
+    if os.path.exists(nav) and "DiagUi.show" not in io_open(nav):
+        problems.append("dock long-press entry not wired (LiquidGlassNavBar)")
+
+    picker = os.path.join(shim, "RushEntryPicker.kt")
+    if os.path.exists(picker):
+        p = io_open(picker)
+        if 'DiagLog.event("RUSH", "rush.picker.install"' not in p:
+            problems.append("RushEntryPicker still logs to logcat only")
+        if 'Log.i(TAG, "picker installed' in p:
+            problems.append("RushEntryPicker old logcat-only line still present")
+
+    home = os.path.join(shim, "HomeFirstCut.kt")
+    if os.path.exists(home) and 'DiagLog.error("HOME"' not in io_open(home):
+        problems.append("HomeFirstCut still logs to logcat only")
+
+    check(44, not problems, "; ".join(problems) if problems else
+          "coverage: activity+fragment lifecycle, tap hit-test via Window.Callback, "
+          "About-page entry, dock long-press, logcat-only shim logs migrated")
+
+
+def assert_diag_net(smali_dec: str, smali14: str) -> None:
+    """#45 第 44 轮：OkHttp 一处织入覆盖全部接口（method/path/code/耗时/异常）"""
+    problems = []
+    target = os.path.join(smali_dec, "smali_classes8/com/goudong/jd/data/network/ApiClient$client$2.smali")
+    if not os.path.exists(target):
+        problems.append("ApiClient$client$2.smali missing")
+    else:
+        t = io_open(target)
+        hits = t.count("Lcom/example/liquidglass/DiagNet;->install(")
+        if hits != 1:
+            problems.append(f"DiagNet hook count = {hits}, expected 1")
+        idx = t.find("Lcom/example/liquidglass/DiagNet;->install(")
+        if idx >= 0:
+            tail = t[idx:idx + 400]
+            if "move-result-object v0" not in tail.split("\n")[1]:
+                problems.append("DiagNet hook is not followed by move-result-object v0")
+        if "第 44 轮：网络埋点" not in t:
+            problems.append("network hook marker missing")
+
+    net = os.path.join(smali14, "com", "example", "liquidglass", "DiagNet.smali")
+    if not os.path.exists(net):
+        problems.append("DiagNet not compiled into classes14")
+    else:
+        n = io_open(net)
+        if ".method public static" not in n or "install(Lokhttp3/OkHttpClient$Builder;)" not in n:
+            problems.append("DiagNet.install is not a public static method (ICCE risk)")
+
+    src = os.path.join(_shim_dir(), "DiagNet.kt")
+    if os.path.exists(src):
+        s = io_open(src)
+        for needle in ("eventListener(", "callFailed", "responseHeadersEnd", "net.failed"):
+            if needle not in s:
+                problems.append(f"DiagNet missing {needle}")
+    check(45, not problems, "; ".join(problems) if problems else
+          "network tap: single smali hook at the only OkHttpClient builder; "
+          "records method/path/code/ms/error without body or query")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--apk", required=True)
@@ -3039,14 +3553,19 @@ def main() -> int:
     assert_round40_elm_entry_picker(args.src, args.smali_dec, args.smali14)
     assert_round41_daily_auto_checkin(args.src, args.smali_dec, args.smali14)
     assert_round42_upstream_2_11_40(args.smali_dec)
+    assert_round43_upstream_2_11_49(args.smali_dec)
+    assert_diag_core(args.smali14)
+    assert_diag_export()
+    assert_diag_coverage()
+    assert_diag_net(args.smali_dec, args.smali14)
     assert_no_undefined_regs(args.smali_dec)
 
     failed = [n for n, ok, _ in RESULTS if not ok]
     seen = {n for n, _, _ in RESULTS}
-    for expected in range(1, 41):
+    for expected in range(1, 46):
         if expected not in seen:
             failed.append(expected)
-    print(f"== {'ALL 40 ASSERTIONS PASSED' if not failed else 'FAILED: ' + str(sorted(set(failed)))} ==")
+    print(f"== {'ALL 45 ASSERTIONS PASSED' if not failed else 'FAILED: ' + str(sorted(set(failed)))} ==")
     return 1 if failed else 0
 
 

@@ -5,13 +5,14 @@ package com.goudong.jd.ui.common
 import android.content.Context
 import android.content.res.Configuration
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.viewpager2.widget.ViewPager2
+import com.example.liquidglass.DiagLog
+import com.example.liquidglass.DiagUi
 import com.example.liquidglass.LiquidGlassTabLayout
 
 /**
@@ -113,6 +114,8 @@ open class LiquidGlassNavBar @JvmOverloads constructor(
     private val touchSlop = android.view.ViewConfiguration.get(context).scaledTouchSlop
     private var dragDownX = 0f
     private var dragging = false
+    /** 第 44 轮：dock 长按 700ms 打开诊断弹窗（无 adb 场景的手动导出入口） */
+    private var pressAt = 0L
 
     /**
      * 拖动期间必须关掉 [pagerCallback] 的跟手，否则 `setScrollPosition` 会与
@@ -197,6 +200,7 @@ open class LiquidGlassNavBar @JvmOverloads constructor(
             MotionEvent.ACTION_DOWN -> {
                 dragDownX = event.x
                 dragging = false
+                pressAt = android.os.SystemClock.elapsedRealtime()
                 // 第 14 轮：按住胶囊给按压液态（折射增强 + 手指下局部凸起）；
                 // setIndicatorPress 只在手指落在滴上时生效
                 setIndicatorPress(true, event.x, event.y)
@@ -215,9 +219,15 @@ open class LiquidGlassNavBar @JvmOverloads constructor(
             MotionEvent.ACTION_UP -> {
                 setIndicatorPress(false, event.x, event.y)
                 val wasDragging = dragging
+                val held = android.os.SystemClock.elapsedRealtime() - pressAt
                 dragging = false
                 fingerDragging = false
                 setIndicatorLifted(false)
+                if (!wasDragging && held >= DiagUi.longPressThresholdMs()) {
+                    // 第 44 轮：长按 dock = 打开诊断（不切 tab）
+                    hostActivity()?.let { DiagUi.show(it) }
+                    return true
+                }
                 if (wasDragging) {
                     // 松手吸附到最近的标签：走 selectId 的语义（会通知业务层，鉴权拒绝时自动回滚）
                     val index = nearestTabIndex()
@@ -249,6 +259,16 @@ open class LiquidGlassNavBar @JvmOverloads constructor(
             }
         }
         return super.onTouchEvent(event)
+    }
+
+    /** 从任意 Context 往上找 Activity（dock 长按入口用） */
+    private fun hostActivity(): android.app.Activity? {
+        var c: Context? = context
+        while (c is android.content.ContextWrapper) {
+            if (c is android.app.Activity) return c
+            c = c.baseContext
+        }
+        return null
     }
 
     /** 拖拽松手后的落位：走与点击一致的「选中 → 回调 → 失败回滚」路径 */
@@ -429,7 +449,7 @@ open class LiquidGlassNavBar @JvmOverloads constructor(
      */
     open fun setBadge(id: Int, count: Int) {
         if (id == MORE_TAB_ID && count > 0) {
-            Log.d(NAV_TAG, "setBadge($id, $count) ignored: badge rendering was intentionally removed")
+            DiagLog.debug("NAV", "nav.badge.ignored", "id" to id, "count" to count)
         }
     }
 
@@ -519,7 +539,7 @@ open class LiquidGlassNavBar @JvmOverloads constructor(
         if (isDarkTheme(context)) return DARK_SELECTED_TINT
         val id = context.resources.getIdentifier("brand_primary", "color", context.packageName)
         if (id == 0) {
-            Log.w(NAV_TAG, "color/brand_primary not found in ${context.packageName}, using fallback")
+            DiagLog.warn("NAV", "nav.brand.missing", "pkg" to context.packageName)
             return FALLBACK_BRAND
         }
         return runCatching { context.resources.getColor(id, context.theme) }.getOrDefault(FALLBACK_BRAND)

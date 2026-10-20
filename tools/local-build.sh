@@ -18,7 +18,7 @@
 #                                       goudong.apk 比它新时自动重新解码。
 #
 # 产物：build/goudong-patched.apk（固定密钥 tools/signing/goudong-signing.keystore 签名，
-# 与 CI 同一签名 → 与 CI 包互相可覆盖安装），并跑完 verify.py 的 40 项产物断言。
+# 与 CI 同一签名 → 与 CI 包互相可覆盖安装），并跑完 verify.py 的 45 项产物断言。
 #
 # 环境变量（都有默认值，可按需覆盖）：
 #   JAVA_HOME   JDK/JRE 路径（需要 java 17+）
@@ -93,6 +93,10 @@ else
   log "1-2/9 增量：复用 build/lg-src + build/lg-classes（源码未变；--full 可强制重编译）"
 fi
 
+# ---- 2b) 诊断日志纯逻辑自测（DiagFormat；不依赖 Android，约 10 秒） ----------
+log "2b/9 诊断日志纯逻辑自测（tools/diag-selftest）"
+bash tools/diag-selftest/run.sh
+
 # ---- 3) 解码：原始树缓存到 build/dec-raw，每次从它拷出可打的 build/dec ----------
 need_decode=1
 if [ "$FULL" = 0 ] && [ -f "$DEC_RAW/apktool.yml" ] && [ "$DEC_RAW" -nt goudong.apk ]; then
@@ -117,7 +121,7 @@ node tools/patch-tasks.mjs build/dec
 node tools/patch-push.mjs build/dec tools/theme.json
 node tools/patch-background.mjs build/dec
 log "4b/9 patch-brand（应用名/图标/包名 com.goudong.open）"
-node tools/patch-brand.mjs build/dec com.goudong.open 2.11.44
+node tools/patch-brand.mjs build/dec com.goudong.open 2.11.50
 log "5/9 patch-tablayout（契约表改写 proto，修 Tab.setText 链式返回）"
 node tools/patch-tablayout.mjs build/dec
 log "6/9 patch-uikit / patch-widgets / patch-crashcatcher（早崩取证）/ patch-noresume-reload（切页不重载）/ patch-activity-page（仅序号隐藏；分页已于第 30 轮删除）"
@@ -152,6 +156,10 @@ log "6m/9 patch-round41（当日首次进入 App 自动签到 + 祈福；开关�
 node tools/patch-round41.mjs build/dec
 log "6n/9 patch-round42（跟进上游 2.11.34 → 2.11.40：登录/会话重构 + 酷狗抢兑模式配置；补丁链尾，版本号 2.11.44/167 权威）"
 node tools/patch-round42.mjs build/dec
+log "6o/9 patch-round43（跟进上游 2.11.40 → 2.11.49：喜马拉雅抢兑 / 现金·分成 / 设计系统；写 2.11.49/175，链尾由 round44 叠加）"
+node tools/patch-round43.mjs build/dec
+log "6p/9 patch-round44（日志体系重构；补丁链尾，版本号 2.11.50/176 权威）"
+node tools/patch-round44.mjs build/dec
 log "7/9 build-dex（d8 + baksmali -> smali_classes14）"
 bash tools/liquidglass/build-dex.sh
 log "8/9 rebuild / align / sign（固定密钥）"
@@ -161,7 +169,7 @@ log "8/9 rebuild / align / sign（固定密钥）"
   --ks tools/signing/goudong-signing.keystore --ks-pass pass:android --key-pass pass:android \
   --ks-key-alias gd --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true \
   --out build/goudong-patched.apk build/aligned.apk
-log "9/9 verify.py（40 项断言）"
+log "9/9 verify.py（45 项断言）"
 python3 tools/liquidglass/verify.py \
   --apk build/goudong-patched.apk \
   --smali14 build/dec/smali_classes14 \

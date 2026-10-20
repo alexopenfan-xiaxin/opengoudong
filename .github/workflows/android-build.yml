@@ -86,6 +86,12 @@ jobs:
           ANDROID_SDK_ROOT: ${{ steps.sdk.outputs.root }}
         run: bash tools/liquidglass/compile.sh
 
+      # 第 44 轮：DiagFormat 纯逻辑自测（脱敏 / 折叠 / 轮转 / 保留 / 截断；约 10 秒）
+      - name: Diagnostics logger self-test (pure JVM)
+        env:
+          LG_CACHE: ${{ github.workspace }}/build/tools/dl
+        run: bash tools/diag-selftest/run.sh
+
       - name: Decode APK
         run: java -jar build/tools/apktool.jar d -f "$APK_NAME" -o build/dec
 
@@ -93,7 +99,7 @@ jobs:
         run: node tools/patch-theme.mjs build/dec tools/theme.json
 
       - name: Apply brand (app name / icon / package com.goudong.open)
-        run: node tools/patch-brand.mjs build/dec com.goudong.open 2.11.44
+        run: node tools/patch-brand.mjs build/dec com.goudong.open 2.11.50
 
       - name: Disable update check (user request)
         run: node tools/patch-update.mjs build/dec
@@ -201,7 +207,7 @@ jobs:
       - name: Round 41 daily auto check-in / pray (default on)
         run: node tools/patch-round41.mjs build/dec
 
-      # ------------------- round 42: follow upstream 2.11.34 -> 2.11.40 (chain tail)
+      # ------------------- round 42: follow upstream 2.11.34 -> 2.11.40
       # 登录/会话重构（删 JdLoginActivity/JdGuestFragment/JdRepository 旧 cookie 链路，
       # 改 MainActivity.authLauncher -> AuthActivity + handleUnauthorized(Z)/requiresAuth）、
       # 酷狗抢兑模式配置（KugouPortalConfigStore / loadKugouPortalConfig / setKugouRushModePref）、
@@ -210,6 +216,22 @@ jobs:
       # 本步骤是补丁链尾，版本号 2.11.44 / versionCode 167 由它落定。
       - name: Round 42 follow upstream 2.11.40 (login refactor + kugou rush mode)
         run: node tools/patch-round42.mjs build/dec
+      # ------------------- round 43: follow upstream 2.11.40 -> 2.11.49 (chain tail)
+      # 喜马拉雅抢兑（XmlyRushFragment / XmlyTimeHelper / 12 个模型 + PortalRepository xmly*）、
+      # 现金与分成（PortalCashBalance/Log、CashLogSheet、CashLogActivity、RevenueShareSupport）、
+      # 设计系统重构（AppTextStyle/AppTypography/AppTypographyKt + AppThemeKt.themeColor）、
+      # 饿了么日常抢兑/充值中心卡片/通知分类等 110 个文件的迭代；我方第 35–42 轮改动以行级
+      # 替换回放重贴（两个入口选择器 / dock inset / 玻璃换装 / 活动序号隐藏 / 自动打卡）。
+      # 移植产物在 tools/upstream-2.11.49/（判定链见 tooling/）；本步骤写 2.11.49/175，
+      # 链尾的 round44 再叠加本地发版号（2.11.50/176 由 round44 落定）。
+      - name: Round 43 follow upstream 2.11.49 (xmly rush + cash/revenue share + design system)
+        run: node tools/patch-round43.mjs build/dec
+
+      # ------------------- round 44: in-app diagnostics logging (chain tail, version authority)
+      # 日志体系在 shim（DiagLog/DiagExport/DiagTrace/DiagNet/DiagUi）+ patch-crashcatcher 两处织入；
+      # 本步骤是补丁链尾：版本号 2.11.50 / versionCode 176 由它落定。
+      - name: Patch round-44 (diagnostics logging; version authority)
+        run: node tools/patch-round44.mjs build/dec
 
       # ---------------------------------------------------------------- Task 4
       - name: Build classes14.dex and stage smali / native lib
